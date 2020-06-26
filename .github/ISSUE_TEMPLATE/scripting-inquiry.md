@@ -2,8 +2,8 @@
 name: Scripting inquiry
 about: 'Questions regarding Datavyu''s scripting API. '
 title: ''
-labels: Support
-assignees: Xubes
+labels: ''
+assignees: jperricone
 
 ---
 
