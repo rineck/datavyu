@@ -169,7 +169,7 @@ public final class SpreadsheetColumn extends JLabel implements VariableListener,
         if (var.getRootNode().type != Argument.Type.MATRIX) typeString = "  (" + var.getRootNode().type + ")";
         setText(var.getName() + typeString); //typeString for matrices is empty. Only displayed for non-matrix types (Text, Nominal)
 
-        datapanel = new ColumnDataPanel(db, width, var, cellSelL);
+        datapanel = new ColumnDataPanel(this, width, var, cellSelL);
         this.setVisible(!var.isHidden());
         datapanel.setVisible(!var.isHidden());
 
@@ -586,7 +586,7 @@ public final class SpreadsheetColumn extends JLabel implements VariableListener,
 
     @Override
     public void cellInserted(final Cell newCell) {
-        datapanel.insertCell(dataStore, newCell, cellSelList);
+        datapanel.insertCell(this, newCell, cellSelList);
     }
 
     @Override

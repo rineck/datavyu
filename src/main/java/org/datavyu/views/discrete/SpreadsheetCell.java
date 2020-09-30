@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Logger;
 import org.datavyu.Datavyu;
 import org.datavyu.models.db.Cell;
 import org.datavyu.models.db.CellListener;
-import org.datavyu.models.db.DataStore;
 import org.datavyu.models.db.CellValue;
 import org.datavyu.util.ClockTimer;
 import org.datavyu.util.ConfigProperties;
@@ -28,7 +27,6 @@ import org.datavyu.views.discrete.datavalues.TimeStampDataValueEditor.TimeStampS
 import org.datavyu.views.discrete.datavalues.TimeStampTextField;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
-import org.jruby.RubyObject;
 
 import javax.swing.*;
 import javax.swing.Box.Filler;
@@ -156,12 +154,13 @@ public class SpreadsheetCell extends JPanel
     private boolean onsetProcessed = false;
     private boolean beingProcessed = false;
 
-    private SpreadsheetColumn parentColumn = null;
+    private final SpreadsheetColumn parentColumn;
 
-    public SpreadsheetCell(final DataStore cellDB,
+    public SpreadsheetCell(final SpreadsheetColumn parentColumn,
                            final Cell cell,
                            final CellSelectionListener listener) {
 
+        this.parentColumn = parentColumn;
         model = cell;
         setName(this.getClass().getSimpleName());
 
@@ -647,14 +646,6 @@ public class SpreadsheetCell extends JPanel
         Datavyu.getView().getSpreadsheetPanel().validate();
         Datavyu.getView().getSpreadsheetPanel().reorientView(this);
 
-        if(parentColumn == null) {
-            for (SpreadsheetColumn col : Datavyu.getView().getSpreadsheetPanel().getColumns()) {
-                if (col.getVariable() == model.getVariable()) {
-                    parentColumn = col;
-                    break;
-                }
-            }
-        }
         parentColumn.setSelected(true);
     }
 
@@ -662,15 +653,6 @@ public class SpreadsheetCell extends JPanel
     public void focusLost(final FocusEvent e) {
         if (brandNew) model.setSelected(false);
         brandNew = false;
-
-        if(parentColumn == null) {
-            for (SpreadsheetColumn col : Datavyu.getView().getSpreadsheetPanel().getColumns()) {
-                if (col.getVariable() == model.getVariable()) {
-                    parentColumn = col;
-                    break;
-                }
-            }
-        }
 
         parentColumn.setIndexOfPreviousFocusedCell(getDataView().getEdTracker().indexOfCurrentEditor());
 

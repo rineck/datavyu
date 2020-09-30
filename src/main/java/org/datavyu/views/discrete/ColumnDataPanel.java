@@ -72,12 +72,12 @@ public final class ColumnDataPanel extends JPanel implements KeyEventDispatcher 
     /**
      * Creates a new ColumnDataPanel.
      *
-     * @param db       The datastore that this column data panel reflects.
+     * @param column   The column containing this panel
      * @param width    The width of the new column data panel in pixels.
      * @param variable The Data Column that this panel represents.
      * @param cellSelL Spreadsheet cell selection listener.
      */
-    public ColumnDataPanel(final DataStore db,
+    public ColumnDataPanel(final SpreadsheetColumn column,
                            final int width,
                            final Variable variable,
                            final CellSelectionListener cellSelL) {
@@ -105,7 +105,7 @@ public final class ColumnDataPanel extends JPanel implements KeyEventDispatcher 
         this.add(padding);
 
         // Populate the data column with spreadsheet cells.
-        buildDataPanelCells(db, variable, cellSelL);
+        buildDataPanelCells(column, variable, cellSelL);
     }
 
     /**
@@ -127,17 +127,17 @@ public final class ColumnDataPanel extends JPanel implements KeyEventDispatcher 
     /**
      * Build the SpreadsheetCells and add to the DataPanel.
      *
-     * @param db       The datastore holding cells that this column will represent.
+     * @param column   The column containing the cells
      * @param variable The variable to display.
      * @param cellSelL Spreadsheet listener to notify about cell selection
      *                 changes.
      */
-    private void buildDataPanelCells(final DataStore db, final Variable variable,
+    private void buildDataPanelCells(final SpreadsheetColumn column, final Variable variable,
                                      final CellSelectionListener cellSelL) {
 
         // traverse and build the cells
         for (Cell cell : variable.getCellsTemporally()) {
-            SpreadsheetCell sc = new SpreadsheetCell(db, cell, cellSelL);
+            SpreadsheetCell sc = new SpreadsheetCell(column, cell, cellSelL);
             cell.addListener(sc);
 
             // add cell to the JPanel
@@ -190,9 +190,9 @@ public final class ColumnDataPanel extends JPanel implements KeyEventDispatcher 
      * @param cellSelL SpreadsheetCellSelectionListener to notify of changes in
      *                 selection.
      */
-    public void insertCell(final DataStore ds, final Cell cell, final CellSelectionListener cellSelL) {
+    public void insertCell(final SpreadsheetColumn column, final Cell cell, final CellSelectionListener cellSelL) {
 
-        SpreadsheetCell nCell = new SpreadsheetCell(ds, cell, cellSelL);
+        SpreadsheetCell nCell = new SpreadsheetCell(column, cell, cellSelL);
         nCell.setWidth(this.getWidth());
         cell.addListener(nCell);
 //        cellSelectionL.clearColumnSelection();
