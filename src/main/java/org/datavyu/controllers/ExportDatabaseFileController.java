@@ -417,7 +417,7 @@ public final class ExportDatabaseFileController {
 
                 column.getRootNode().childArguments.forEach(argument -> {
                     try {
-                        g.writeStringField(argument.type.name(), argument.name);
+                        g.writeStringField(argument.name, argument.type.name());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

@@ -219,8 +219,7 @@ public final class OpenDataStoreFileController {
                                                 while (!JsonToken.END_OBJECT.equals(token)) {
                                                     token = parser.nextToken();
                                                     if (token == null) { break; }
-                                                    if (JsonToken.START_OBJECT.equals(token) || JsonToken
-                                                            .START_OBJECT.equals(token) || JsonToken.END_OBJECT
+                                                    if (JsonToken.START_OBJECT.equals(token) || JsonToken.END_OBJECT
                                                             .equals(token)) {
                                                         break;
                                                     }
@@ -233,10 +232,10 @@ public final class OpenDataStoreFileController {
                                                         variableArg.name = parser.getValueAsString();
                                                     }
                                                     if (variableType == Argument.Type.MATRIX) {
-                                                        if (getVarType(parser.getCurrentName()) != null) {
+                                                        if (getVarType(parser.getValueAsString()) != null) {
                                                             variableArg.childArguments.add(new Argument(parser
-                                                                    .getValueAsString(), getVarType(parser
-                                                                    .getCurrentName())));
+                                                                    .getCurrentName(), getVarType(parser
+                                                                    .getValueAsString())));
                                                         } else {
                                                             logger.warn("Unknown argument ('" + parser.getCurrentName
                                                                     () + "' line " + parser.getCurrentLocation()

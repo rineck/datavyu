@@ -2603,12 +2603,12 @@ public final class DatavyuView extends FrameView implements FileDropEventListene
         if (totalNumberOfVisibleColumns == 0) {
             newCellMenuItem.setEnabled(false);
             exportJSON.setEnabled(false);
-            importJSON.setEnabled(false);
         } else {
             newCellMenuItem.setEnabled(true);
             exportJSON.setEnabled(true);
-            importJSON.setEnabled(true);
         }
+
+        importJSON.setEnabled(true);
 
         List<Variable> selectedCols = Datavyu.getProjectController().getDataStore().getSelectedVariables();
 
