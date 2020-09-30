@@ -261,7 +261,7 @@
     <repositories>
         <repository>
             <id>java</id>
-            <url>http://download.java.net/maven/2</url>
+            <url>https://maven.java.net/content/groups/public</url>
             <layout>default</layout>
         </repository>
 
@@ -273,7 +273,7 @@
 
         <repository>
             <id>maven</id>
-            <url>http://repo1.maven.org/maven2</url>
+            <url>https://repo1.maven.org/maven2</url>
             <layout>default</layout>
         </repository>
 
@@ -311,6 +311,12 @@
 
     <!-- External plugin repositories - where to find third-part dependencies. -->
     <pluginRepositories>
+        <pluginRepository>
+            <id>maven</id>
+            <url>https://repo1.maven.org/maven2</url>
+            <layout>default</layout>
+        </pluginRepository>
+
         <pluginRepository>
             <id>datavyu</id>
             <url>http://datavyu.org/maven2</url>
@@ -979,8 +985,8 @@
         <!-- TODO: Need to check if this works for Mac with java 1.8 -->
         <!-- See the discussion here: https://stackoverflow.com/questions/15048220/can-java-7-use-apple-java-extensions -->
         <dependency>
-            <groupId>apple.java</groupId>
-            <artifactId>applejavaextensions</artifactId>
+            <groupId>com.apple</groupId>
+            <artifactId>AppleJavaExtensions</artifactId>
             <version>1.4</version>
         </dependency>
 
