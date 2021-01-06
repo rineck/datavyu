@@ -266,12 +266,6 @@
         </repository>
 
         <repository>
-            <id>datavyu</id>
-            <url>http://datavyu.org/maven2</url>
-            <layout>default</layout>
-        </repository>
-
-        <repository>
             <id>maven</id>
             <url>https://repo1.maven.org/maven2</url>
             <layout>default</layout>
@@ -314,12 +308,6 @@
         <pluginRepository>
             <id>maven</id>
             <url>https://repo1.maven.org/maven2</url>
-            <layout>default</layout>
-        </pluginRepository>
-
-        <pluginRepository>
-            <id>datavyu</id>
-            <url>http://datavyu.org/maven2</url>
             <layout>default</layout>
         </pluginRepository>
 
@@ -414,7 +402,7 @@
 
             <dependencies>
                 <dependency>
-                    <groupId>ch.randelshofer.quaqua</groupId>
+                    <groupId>org.datavyu</groupId>
                     <artifactId>quaqua-osx64</artifactId>
                     <version>7.0.1</version>
                 </dependency>
@@ -1027,7 +1015,7 @@
         <!-- Could not update this dependency because https://mvnrepository.com/artifact/ch.randelshofer/quaqua/8.0 -->
         <!-- does not include the jar anymore 09/19/2017 -->
         <dependency>
-            <groupId>ch.randelshofer.quaqua</groupId>
+            <groupId>org.datavyu</groupId>
             <artifactId>quaqua-filechooser-only</artifactId>
             <version>7.0.1</version>
         </dependency>
