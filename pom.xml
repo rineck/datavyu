@@ -232,8 +232,8 @@
 
     <!-- Our bug tracking. -->
     <issueManagement>
-        <system>JIRA</system>
-        <url>projects.databrary.org</url>
+        <system>Github Issues</system>
+        <url>https://github.com/databrary/datavyu/issues</url>
     </issueManagement>
 
     <!-- Our source control. -->
