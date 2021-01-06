@@ -24,7 +24,7 @@
 # Download and install WiX 3.0 or later from http://wix.sf.net and add it to the PATH.
 #  I installed v3.11 from here https://github.com/wixtoolset/wix3/releases/tag/wix311rtm and added it to the PATH.
 #
-# Please specify the name of the JNLP Outut file in 'jnlp.outfile'
+# Please specify the name of the JNLP Output file in 'jnlp.outfile'
 #  I did not set this up because I did not need a 'WebStart JNLP Bundler'.
 curl http://www.datavyu.org/docs/user-guide.pdf > packaged_docs/user-guide.pdf
 # Add the -X flag to get debug information
