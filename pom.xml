@@ -260,20 +260,8 @@
     <!-- External repositories - where to find third-party dependencies. -->
     <repositories>
         <repository>
-            <id>java</id>
-            <url>https://maven.java.net/content/groups/public</url>
-            <layout>default</layout>
-        </repository>
-
-        <repository>
-            <id>maven</id>
+            <id>central</id>
             <url>https://repo1.maven.org/maven2</url>
-            <layout>default</layout>
-        </repository>
-
-        <repository>
-            <id>hello2morrorw</id>
-            <url>http://maven.hello2morrow.com/repository</url>
             <layout>default</layout>
         </repository>
 
@@ -281,7 +269,7 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>central</id>
+            <id>release</id>
             <name>oss-jfrog-artifactory-releases</name>
             <url>https://oss.jfrog.org/artifactory/oss-release-local</url>
         </repository>
@@ -306,46 +294,9 @@
     <!-- External plugin repositories - where to find third-part dependencies. -->
     <pluginRepositories>
         <pluginRepository>
-            <id>maven</id>
+            <id>central</id>
             <url>https://repo1.maven.org/maven2</url>
             <layout>default</layout>
-        </pluginRepository>
-
-        <pluginRepository>
-            <id>mc-release</id>
-            <name>Local Maven repository of releases</name>
-            <url>http://mc-repo.googlecode.com/svn/maven2/releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </pluginRepository>
-
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>central</id>
-            <name>oss-jfrog-artifactory-releases</name>
-            <url>https://oss.jfrog.org/artifactory/oss-release-local</url>
-        </pluginRepository>
-
-        <pluginRepository>
-            <snapshots />
-            <id>snapshots</id>
-            <name>oss-jfrog-artifactory-snapshots</name>
-            <url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
-        </pluginRepository>
-
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-datavyu-datavyu</id>
-            <name>bintray-plugins</name>
-            <url>https://dl.bintray.com/datavyu/datavyu</url>
         </pluginRepository>
     </pluginRepositories>
 
