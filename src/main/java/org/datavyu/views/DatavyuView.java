@@ -15,7 +15,6 @@
 package org.datavyu.views;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import javafx.embed.swing.JFXPanel;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -219,7 +218,6 @@ public final class DatavyuView extends FrameView implements FileDropEventListene
 
         // generated GUI builder code
         initComponents();
-        new JFXPanel();
 
         this.getFrame().setGlassPane(new TransparentPanel());
         this.getFrame().setVisible(true);
