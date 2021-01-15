@@ -487,7 +487,9 @@ public class SpreadsheetCell extends JPanel
         if (Datavyu.getVideoController().getCellHighlightAndFocus()) {
             if (model.isPastTimeWindow(Datavyu.getVideoController().getCurrentTime())) {
                 cellPanel.setBackground(pastTimeHighlightColor);
-            } else if (cellPanel.getBackground() == pastTimeHighlightColor) {
+            }  else if(model.isInTimeWindow(Datavyu.getVideoController().getCurrentTime())) {
+                cellPanel.setBackground(timeHighlightColor);
+            } else {
                 cellPanel.setBackground(ConfigProperties.getInstance().getSpreadSheetBackgroundColor());
             }
         } else if (Datavyu.getVideoController().getCellHighlighting()) {
