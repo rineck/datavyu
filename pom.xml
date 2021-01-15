@@ -7,12 +7,12 @@
     <packaging>jar</packaging>
     <version>1.5.1-SNAPSHOT</version>
     <name>Datavyu</name>
-    <url>http://datavyu.org</url>
+    <url>https://datavyu.org</url>
 
     <!-- Our organisation. -->
     <organization>
         <name>Datavyu Foundation</name>
-        <url>http://datavyu.org</url>
+        <url>https://datavyu.org</url>
     </organization>
 
     <!-- Credits for Datavyu: -->
@@ -232,8 +232,8 @@
 
     <!-- Our bug tracking. -->
     <issueManagement>
-        <system>JIRA</system>
-        <url>projects.databrary.org</url>
+        <system>Github Issues</system>
+        <url>https://github.com/databrary/datavyu/issues</url>
     </issueManagement>
 
     <!-- Our source control. -->
@@ -260,26 +260,8 @@
     <!-- External repositories - where to find third-party dependencies. -->
     <repositories>
         <repository>
-            <id>java</id>
-            <url>https://maven.java.net/content/groups/public</url>
-            <layout>default</layout>
-        </repository>
-
-        <repository>
-            <id>datavyu</id>
-            <url>http://datavyu.org/maven2</url>
-            <layout>default</layout>
-        </repository>
-
-        <repository>
-            <id>maven</id>
+            <id>central</id>
             <url>https://repo1.maven.org/maven2</url>
-            <layout>default</layout>
-        </repository>
-
-        <repository>
-            <id>hello2morrorw</id>
-            <url>http://maven.hello2morrow.com/repository</url>
             <layout>default</layout>
         </repository>
 
@@ -287,7 +269,7 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>central</id>
+            <id>release</id>
             <name>oss-jfrog-artifactory-releases</name>
             <url>https://oss.jfrog.org/artifactory/oss-release-local</url>
         </repository>
@@ -312,96 +294,14 @@
     <!-- External plugin repositories - where to find third-part dependencies. -->
     <pluginRepositories>
         <pluginRepository>
-            <id>maven</id>
+            <id>central</id>
             <url>https://repo1.maven.org/maven2</url>
             <layout>default</layout>
-        </pluginRepository>
-
-        <pluginRepository>
-            <id>datavyu</id>
-            <url>http://datavyu.org/maven2</url>
-            <layout>default</layout>
-        </pluginRepository>
-
-        <pluginRepository>
-            <id>mc-release</id>
-            <name>Local Maven repository of releases</name>
-            <url>http://mc-repo.googlecode.com/svn/maven2/releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </pluginRepository>
-
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>central</id>
-            <name>oss-jfrog-artifactory-releases</name>
-            <url>https://oss.jfrog.org/artifactory/oss-release-local</url>
-        </pluginRepository>
-
-        <pluginRepository>
-            <snapshots />
-            <id>snapshots</id>
-            <name>oss-jfrog-artifactory-snapshots</name>
-            <url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
-        </pluginRepository>
-
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>bintray-datavyu-datavyu</id>
-            <name>bintray-plugins</name>
-            <url>https://dl.bintray.com/datavyu/datavyu</url>
         </pluginRepository>
     </pluginRepositories>
 
     <!-- Use an optimized build for releases. -->
     <profiles>
-
-        <profile>
-            <id>debug-win</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy</id>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <!--<configuration>-->
-                                    <!--<artifactItems>-->
-                                        <!--<artifactItem>-->
-                                            <!--<groupId>org.datavyu</groupId>-->
-                                            <!--<artifactId>vlcLibs-windows64</artifactId>-->
-                                            <!--<type>jar</type>-->
-                                            <!--<overWrite>true</overWrite>-->
-                                            <!--<outputDirectory>-->
-                                                <!--${project.build.outputDirectory}/lib/vlc-windows-${os.arch}-->
-                                            <!--</outputDirectory>-->
-                                            <!--<destFileName>vlc-windows-${os.arch}.jar</destFileName>-->
-                                        <!--</artifactItem>-->
-                                    <!--</artifactItems>-->
-                                    <!--<outputDirectory>${project.build.outputDirectory}/lib/vlc-windows-${os.arch}-->
-                                    <!--</outputDirectory>-->
-                                    <!--<overWriteReleases>false</overWriteReleases>-->
-                                    <!--<overWriteSnapshots>true</overWriteSnapshots>-->
-                                <!--</configuration>-->
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-
-            </build>
-        </profile>
 
         <!-- Platform specific dependencies. -->
         <profile>
@@ -414,7 +314,7 @@
 
             <dependencies>
                 <dependency>
-                    <groupId>ch.randelshofer.quaqua</groupId>
+                    <groupId>org.datavyu</groupId>
                     <artifactId>quaqua-osx64</artifactId>
                     <version>7.0.1</version>
                 </dependency>
@@ -446,72 +346,6 @@
                     <classifier>win</classifier>
                 </dependency>
             </dependencies>
-
-            <build>
-                <plugins>
-                    <!-- BugzID:305 - Windows Application Bundle -->
-                    <!-- Replace org.bluestemsoftware.open.maven.plugin by com.akathist which has a newer launch4j -->
-                    <!-- Documentation here: http://launch4j.sourceforge.net/docs.html -->
-                    <!-- Debug by running with datavyu-1.3.7.exe - -l4j-debug-all -->
-                    <!-- Updated here: 09/18/2017 -->
-                    <plugin>
-                        <groupId>com.akathist.maven.plugins.launch4j</groupId>
-                        <artifactId>launch4j-maven-plugin</artifactId>
-                        <version>1.7.21</version>
-                        <executions>
-                            <execution>
-                                <id>l4j-gui</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>launch4j</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <headerType>gui</headerType>
-                            <outfile>${basedir}/target/${project.build.finalName}-${os.detected.name}.exe</outfile>
-                            <jar>${basedir}/target/${project.build.finalName}-${os.detected.name}.jar</jar>
-                            <stayAlive>true</stayAlive>
-                            <icon>${basedir}/src/main/resources/icons/Datavyu.ico</icon>
-                            <splash>
-                                <file>${basedir}/src/main/resources/icons/splash.bmp</file>
-                                <waitForWindow>true</waitForWindow>
-                                <timeout>60</timeout>
-                                <timeoutErr>true</timeoutErr>
-                            </splash>
-                            <jre>
-                                <minVersion>1.7.0</minVersion> <!-- Because of javafx runtime environment -->
-                                <jdkPreference>preferJre</jdkPreference>
-                            </jre>
-                            <classPath>
-                                <mainClass>org.datavyu.Datavyu</mainClass>
-                                <!-- Add project jar: https://sourceforge.net/p/launch4j/discussion/332684/thread/049f9c89/ -->
-                                <postCp>${project.build.finalName}.jar</postCp>
-                            </classPath>
-                            <messages>
-                                <startupErr>Startup error. Most likely error in classpath.</startupErr>
-                                <bundledJreErr>Bundled JRE is incompatible with source code requirements.</bundledJreErr>
-                                <jreVersionErr>Version of JRE is incompatible.</jreVersionErr>
-                                <launcherErr>Error when launching application.</launcherErr>
-                                <!-- Used by console header only. -->
-                                <instanceAlreadyExistsMsg>Application is already running.</instanceAlreadyExistsMsg>
-                            </messages>
-                            <versionInfo>
-                                <fileVersion>1.3.7.1</fileVersion>
-                                <txtFileVersion>FFmpeg</txtFileVersion>
-                                <fileDescription>Datavyu</fileDescription>
-                                <copyright>Copyright Datavyu</copyright>
-                                <productVersion>1.3.7.0</productVersion>
-                                <txtProductVersion>Product</txtProductVersion>
-                                <productName>Datavyu</productName>
-                                <companyName>Datavyu</companyName>
-                                <internalName>DatavyuInternal</internalName>
-                                <originalFilename>DatavyuRunner.exe</originalFilename>
-                            </versionInfo>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
 
         <profile>
@@ -555,6 +389,35 @@
     <!-- Build properties. -->
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.8.1</version>
+                <configuration>
+                    <generateBackupPoms>false</generateBackupPoms>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.5.3</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
             <!-- BugzID:137 - Checks and Adds license header to source. -->
             <!-- Checks and updates license headers in source files -->
@@ -597,11 +460,11 @@
             <!-- Copies project resources to the output directory -->
             <!-- Artifact: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-resources-plugin -->
             <!-- Documentation: -->
-            <!-- Updated here: 03/29/2019 -->
+            <!-- Updated here: 01/05/2021 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.2.0</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -615,7 +478,7 @@
             <plugin>
                 <groupId>org.openclover</groupId>
                 <artifactId>clover-maven-plugin</artifactId>
-                <version>4.2.0</version>
+                <version>4.4.1</version>
                 <configuration>
                     <licenseLocation>/var/clover/clover.license</licenseLocation>
                     <historyDir>/var/clover/datavyu</historyDir>
@@ -676,9 +539,6 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <descriptors>
-                        <descriptor>${assembly-config}</descriptor>
-                    </descriptors>
                     <outputDirectory>target/site/snapshots</outputDirectory>
                 </configuration>
             </plugin>
@@ -686,7 +546,7 @@
             <!-- Maven compiler -->
             <!-- Artifact: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
             <!-- Documentation: https://maven.apache.org/plugins/maven-compiler-plugin/plugin-info.html -->
-            <!-- Updated here: 09/20/2017 -->
+            <!-- Updated here: 01/05/2021 -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
@@ -702,7 +562,7 @@
             <!-- Updated here: 09/20/2017 -->
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
+                <version>3.1.1</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -718,27 +578,26 @@
             </plugin>
 
             <!-- A plugin to allow execution of system and Java programs -->
+            <!-- use: mvn -Dmaven.test.skip=true clean compile exec:java -->
             <!-- Artifact: https://mvnrepository.com/artifact/org.codehaus.mojo/exec-maven-plugin -->
             <!-- Documentation: http://www.mojohaus.org/exec-maven-plugin/plugin-info.html -->
-            <!-- Updated here: 09/20/2017 -->
+            <!-- Updated here: 01/05/2021 -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>run</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
+                    <mainClass>org.datavyu.Datavyu</mainClass>
                     <includePluginDependencies>true</includePluginDependencies>
                 </configuration>
-                <!-- Pick up the jar packaged with the JRE used during compilation -->
-                <!-- See: https://stackoverflow.com/questions/15278215/maven-project-with-javafx-with-jar-file-in-lib -->
-                <dependencies>
-                    <dependency>
-                        <groupId>javafx</groupId>
-                        <artifactId>jfxrt</artifactId>
-                        <version>${java.version}</version>
-                        <scope>system</scope>
-                        <systemPath>${java.home}/lib/ext/jfxrt.jar</systemPath>
-                    </dependency>
-                </dependencies>
             </plugin>
 
             <plugin>
@@ -750,7 +609,7 @@
                 <!-- Updated here: 09/19/2017 -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.3</version>
+                <version>1.4</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>
@@ -788,10 +647,10 @@
                 <!-- Runs Ant scripts embedded in the POM  -->
                 <!-- Artifact: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-antrun-plugin/1.8 -->
                 <!-- Documentation: http://maven.apache.org/plugins/maven-antrun-plugin/plugin-info.html -->
-                <!-- Updated here: 09/21/2017 -->
+                <!-- Updated here: 01/05/2021 -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
+                <version>3.0.0</version>
                 <executions>
 
                     <!-- Set the build number in the bundles file. -->
@@ -802,7 +661,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <!-- BugzID:1827 - Added template file that gets copied when
                                      we do a build so we don't get accidental properties file
                                      commits. -->
@@ -820,7 +679,7 @@
 
                                 <!-- BugzID:304 - Create output directory for DMG. -->
                                 <mkdir dir="${project.build.directory}/site/snapshots/"/>
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
 
@@ -833,7 +692,7 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <taskdef
                                         name="replaceregexp"
                                         classname="org.apache.tools.ant.taskdefs.optional.ReplaceRegExp"/>
@@ -841,7 +700,7 @@
                                         file="src/main/resources/org/datavyu/resources/Datavyu.properties"
                                         match="Application.build =(.*)"
                                         replace="Application.build = b:none"/>
-                            </tasks>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
@@ -851,10 +710,10 @@
                 <!-- Used to run the JUnit unit tests in an isolated classloader -->
                 <!-- Documentation https://maven.apache.org/surefire/maven-surefire-plugin/ -->
                 <!-- Artifact: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
-                <!-- Updated here: 09/19/2017 -->
+                <!-- Updated here: 01/05/2021 -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.20.1</version>
+                <version>3.0.0-M5</version>
                 <configuration>
                     <systemProperties>
                         <property>
@@ -1027,7 +886,7 @@
         <!-- Could not update this dependency because https://mvnrepository.com/artifact/ch.randelshofer/quaqua/8.0 -->
         <!-- does not include the jar anymore 09/19/2017 -->
         <dependency>
-            <groupId>ch.randelshofer.quaqua</groupId>
+            <groupId>org.datavyu</groupId>
             <artifactId>quaqua-filechooser-only</artifactId>
             <version>7.0.1</version>
         </dependency>
@@ -1093,16 +952,6 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
             <version>2.9.9</version>
-        </dependency>
-
-        <!-- Updates with JRE from java version >= 1.7 -->
-        <!-- See: https://stackoverflow.com/questions/15278215/maven-project-with-javafx-with-jar-file-in-lib -->
-        <dependency>
-            <groupId>javafx</groupId>
-            <artifactId>jfxrt</artifactId>
-            <version>${java.version}</version>
-            <scope>system</scope>
-            <systemPath>${java.home}/lib/ext/jfxrt.jar</systemPath>
         </dependency>
 
         <dependency>
