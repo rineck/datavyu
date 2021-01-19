@@ -787,6 +787,7 @@ public final class MixerController implements PropertyChangeListener,
 
         enableHighlight.setEnabled(!Datavyu.getVideoController().getCellHighlightAndFocus());
         Datavyu.getProjectController().getSpreadSheetPanel().redrawCells();
+        Datavyu.getApplication().updateTitle();
     }
 
     /**
