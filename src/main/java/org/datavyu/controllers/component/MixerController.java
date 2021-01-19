@@ -225,7 +225,7 @@ public final class MixerController implements PropertyChangeListener,
         enableHighlightAndFocus = new JButton("Enable Highlight and Focus");
         enableHighlightAndFocus.addActionListener(new ActionListener() {
             public void actionPerformed(final ActionEvent e) {
-                enableHighlightAndFocusHandler(e);
+                Datavyu.getView().toggleHighlightAndFocusMode();
             }
         });
         enableHighlightAndFocus.setName("enableHighlightAndFocusButton");
@@ -787,6 +787,7 @@ public final class MixerController implements PropertyChangeListener,
 
         enableHighlight.setEnabled(!Datavyu.getVideoController().getCellHighlightAndFocus());
         Datavyu.getProjectController().getSpreadSheetPanel().redrawCells();
+        Datavyu.getApplication().updateTitle();
     }
 
     /**

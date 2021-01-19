@@ -933,7 +933,6 @@ public final class DatavyuView extends FrameView implements FileDropEventListene
         } else {
             highlightAndFocusMenuItem.setText("Enable Highlight and Focus Mode");
         }
-        updateTitle();
     }
 
     public boolean isQuickKeyMode() {
