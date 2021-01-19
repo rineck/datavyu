@@ -149,7 +149,6 @@ public final class DatavyuView extends FrameView implements FileDropEventListene
     private javax.swing.JMenuItem pullMenuItem;
     private javax.swing.JMenuItem pushMenuItem;
     private javax.swing.JMenuItem videoControllerMenuItem;
-    private javax.swing.JMenuItem videoConverterMenuItem;
     private javax.swing.JMenuItem recentScriptsHeader;
     private javax.swing.JMenuItem redoSpreadSheetMenuItem;
     private javax.swing.JMenuItem resetZoomMenuItem;
@@ -1538,12 +1537,6 @@ public final class DatavyuView extends FrameView implements FileDropEventListene
     }
 
     /**
-     * Action for showing the video converter dialog.
-     */
-    @Action
-    public void showVideoConverter() { Datavyu.getApplication().showVideoConverter(); }
-
-    /**
      * Action for showing the about window.
      */
     @Action
@@ -2016,7 +2009,6 @@ public final class DatavyuView extends FrameView implements FileDropEventListene
         pullMenuItem = new javax.swing.JMenuItem();
         controllerMenu = new javax.swing.JMenu();
         videoControllerMenuItem = new javax.swing.JMenuItem();
-        videoConverterMenuItem = new javax.swing.JMenuItem();
         scriptMenu = new javax.swing.JMenu();
         runScriptMenuItem = new javax.swing.JMenuItem();
         setFavouritesMenuItem = new javax.swing.JMenuItem();
@@ -2343,10 +2335,6 @@ public final class DatavyuView extends FrameView implements FileDropEventListene
         videoControllerMenuItem.setAction(actionMap.get("showVideoController"));
         videoControllerMenuItem.setName("videoControllerItem");
         controllerMenu.add(videoControllerMenuItem);
-
-        videoConverterMenuItem.setAction(actionMap.get("showVideoConverter"));
-        videoConverterMenuItem.setName("videoConverterMenuItem");
-        controllerMenu.add(videoConverterMenuItem);
 
         menuBar.add(controllerMenu);
 
