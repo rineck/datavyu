@@ -599,14 +599,6 @@ public final class Datavyu extends SingleFrameApplication implements KeyEventDis
     }
 
     /**
-     * Action for showing the video converter.
-     */
-    public void showVideoConverter() {
-        VideoConverterV videoConverter = new VideoConverterV();
-        Datavyu.getApplication().show(videoConverter);
-    }
-
-    /**
      * Action for showing the variable list.
      */
     public void showVariableList() {

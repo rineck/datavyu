@@ -901,16 +901,6 @@
             <version>3.0</version>
         </dependency>
 
-        <!-- Java Framework for the vlc Media Player -->
-        <!-- Artifact: https://mvnrepository.com/artifact/uk.co.caprica/vlcj -->
-        <!-- Documentation: http://caprica.github.io/vlcj/javadoc/3.5.0/index.html -->
-        <!-- Updated here: 01/18/2019 -->
-        <dependency>
-            <groupId>uk.co.caprica</groupId>
-            <artifactId>vlcj</artifactId>
-            <version>3.12.0</version>
-        </dependency>
-
         <!-- Logger API -->
         <!-- Artifact: https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
         <!-- Documentation: https://logging.apache.org/log4j/2.x/manual/api.html -->
