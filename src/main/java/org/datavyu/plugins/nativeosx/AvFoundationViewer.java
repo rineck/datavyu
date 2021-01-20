@@ -8,9 +8,6 @@ import org.datavyu.plugins.StreamViewerDialog;
 
 import java.awt.*;
 import java.io.File;
-import org.datavyu.util.ClockTimer;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 
 public class AvFoundationViewer extends StreamViewerDialog  {
 
@@ -19,15 +16,12 @@ public class AvFoundationViewer extends StreamViewerDialog  {
 
   private AvFoundationPlayer player;
 
-  private ClockTimer clockTimer;
-
   AvFoundationViewer(final Identifier identifier, final File sourceFile, final Frame parent, final boolean modal) {
     super(identifier, parent, modal);
     logger.info("Opening file: " + sourceFile.getAbsolutePath());
     player = new AvFoundationPlayer(this, sourceFile);
     setSourceFile(sourceFile);
-    clockTimer = Datavyu.getVideoController().getClockTimer();
-    clockTimer.registerListener(this);
+    Datavyu.getVideoController().getClockTimer().registerListener(this);
   }
 
   @Override
@@ -125,7 +119,7 @@ public class AvFoundationViewer extends StreamViewerDialog  {
   @Override
   protected void cleanUp() {
     logger.info("Destroying the Player");
-    clockTimer.unRegisterListener(this);
+    Datavyu.getVideoController().getClockTimer().unRegisterListener(this);
     player.cleanUp();
   }
 

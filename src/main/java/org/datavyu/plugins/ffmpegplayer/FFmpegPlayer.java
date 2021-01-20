@@ -29,8 +29,8 @@ public class FFmpegPlayer implements SdlKeyEventListener {
      * @param sourceFile The source file
 	 */
 	FFmpegPlayer(FFmpegStreamViewer viewer, File sourceFile) {
-    try {
-    	this.viewer = viewer;
+		try {
+			this.viewer = viewer;
 			this.mediaPlayer = new FfmpegSdlMediaPlayer(sourceFile.toURI());
 			this.mediaPlayer.init();
 			this.mediaPlayer.addSdlKeyEventListener(this);

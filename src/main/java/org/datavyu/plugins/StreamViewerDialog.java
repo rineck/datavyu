@@ -208,9 +208,6 @@ public abstract class StreamViewerDialog extends DatavyuDialog implements Stream
         menuForResize.setName("menuForResize");
 
         initComponents();
-
-        Datavyu.getVideoController()
-            .getClockTimer().registerListener(this);
     }
 
     private void handleVolumeSliderEvent(final ChangeEvent e) {
@@ -576,19 +573,24 @@ public abstract class StreamViewerDialog extends DatavyuDialog implements Stream
 
     @Override
     public synchronized void clockSeekPlayback(final double clockTime) {
-        MixerController mixerController = Datavyu.getVideoController().getMixerController();
-        TracksEditorController tracksEditorController = mixerController.getTracksEditorController();
-        TrackModel trackModel = tracksEditorController.getTrackModel(getIdentifier());
-        ClockTimer clockTimer = Datavyu.getVideoController().getClockTimer();
-        if (trackModel != null
-            && !clockTimer.isPaused()
-            && isSeekPlaybackEnabled()) {
-            double trackTime = Math.min(Math.max(clockTime - trackModel.getOffset(), 0), trackModel.getDuration());
-            logger.info("Clock Seek Playback is seeking stream "
-                        + getIdentifier()
-                        + " to time: "
-                        + trackTime);
-            setCurrentTime((long) trackTime);
+        try {
+            MixerController mixerController = Datavyu.getVideoController().getMixerController();
+            TracksEditorController tracksEditorController = mixerController.getTracksEditorController();
+            TrackModel trackModel = tracksEditorController.getTrackModel(getIdentifier());
+            ClockTimer clockTimer = Datavyu.getVideoController().getClockTimer();
+            if (trackModel != null
+                && !clockTimer.isPaused()
+                && isSeekPlaybackEnabled()) {
+                double trackTime = Math.min(Math.max(clockTime - trackModel.getOffset(), 0), trackModel.getDuration());
+                logger.info("Clock Seek Playback is seeking stream "
+                            + getIdentifier()
+                            + " to time: "
+                            + trackTime);
+                setCurrentTime((long) trackTime);
+            }
+
+        } catch (Exception e) {
+            logger.error("Error during seek playback" + e.getMessage());
         }
     }
 
@@ -599,31 +601,35 @@ public abstract class StreamViewerDialog extends DatavyuDialog implements Stream
 
     @Override
     public synchronized void streamsBoundaryCheck(final double clockTime) {
-        MixerController mixerController = Datavyu.getVideoController().getMixerController();
-        TracksEditorController tracksEditorController = mixerController.getTracksEditorController();
-        TrackModel trackModel = tracksEditorController.getTrackModel(getIdentifier());
-        ClockTimer clockTimer = Datavyu.getVideoController().getClockTimer();
-        if (trackModel != null
-            && !clockTimer.isPaused()
-            && getCurrentTime() != -1) {
-            // Only if in range and not already playing and not in seek playback
-            if (clockTime >= trackModel.getOffset()
-                && clockTime < trackModel.getDuration() + trackModel.getOffset()
-                && !isPlaying()
-                && !isSeekPlaybackEnabled()) {
-                logger.info("Stream Boundary Starting track: " + getIdentifier()
-                    + " Master Clock at " + clockTime
-                    + " and Streamviewer clock at " + getCurrentTime());
-                start();
+        try {
+            MixerController mixerController = Datavyu.getVideoController().getMixerController();
+            TracksEditorController tracksEditorController = mixerController.getTracksEditorController();
+            TrackModel trackModel = tracksEditorController.getTrackModel(getIdentifier());
+            ClockTimer clockTimer = Datavyu.getVideoController().getClockTimer();
+            if (trackModel != null
+                && !clockTimer.isPaused()
+                && getCurrentTime() != -1) {
+                // Only if in range and not already playing and not in seek playback
+                if (clockTime >= trackModel.getOffset()
+                    && clockTime < trackModel.getDuration() + trackModel.getOffset()
+                    && !isPlaying()
+                    && !isSeekPlaybackEnabled()) {
+                    logger.info("Stream Boundary Starting track: " + getIdentifier()
+                        + " Master Clock at " + clockTime
+                        + " and Streamviewer clock at " + getCurrentTime());
+                    start();
+                }
+                if ((clockTime < trackModel.getOffset()
+                    || clockTime >= trackModel.getDuration() + trackModel.getOffset())
+                    && isPlaying()) {
+                    logger.info("Stream Boundary Stopping track: " + getIdentifier()
+                        + " Master Clock at " + clockTime
+                        + " and Streamviewer clock at " + getCurrentTime());
+                    pause();
+                }
             }
-            if ((clockTime < trackModel.getOffset()
-                || clockTime >= trackModel.getDuration() + trackModel.getOffset())
-                && isPlaying()) {
-                logger.info("Stream Boundary Stopping track: " + getIdentifier()
-                    + " Master Clock at " + clockTime
-                    + " and Streamviewer clock at " + getCurrentTime());
-                pause();
-            }
+        } catch (Exception e) {
+            logger.error("Error during stream boundary check " + e.getMessage());
         }
     }
 
@@ -644,18 +650,22 @@ public abstract class StreamViewerDialog extends DatavyuDialog implements Stream
 
     @Override
     public synchronized void clockPeriodicSync(final double clockTime) {
-        MixerController mixerController = Datavyu.getVideoController().getMixerController();
-        TracksEditorController tracksEditorController = mixerController.getTracksEditorController();
-        TrackModel trackModel = tracksEditorController.getTrackModel(getIdentifier());
-        if (trackModel != null
-            && !isSeekPlaybackEnabled()
-            && getCurrentTime() != -1) {
-            double trackTime = Math.min(Math.max(clockTime - trackModel.getOffset(), 0), trackModel.getDuration());
-            double difference = Math.abs(trackTime - getCurrentTime());
-            if (difference >= ClockTimer.SYNC_THRESHOLD) {
-                logger.info("Sync stream " + getIdentifier() + " track time: " + trackTime + " milliseconds. stream time " + getCurrentTime() + " milliseconds");
-                setCurrentTime((long) trackTime);
+        try {
+            MixerController mixerController = Datavyu.getVideoController().getMixerController();
+            TracksEditorController tracksEditorController = mixerController.getTracksEditorController();
+            TrackModel trackModel = tracksEditorController.getTrackModel(getIdentifier());
+            if (trackModel != null
+                && !isSeekPlaybackEnabled()
+                && getCurrentTime() != -1) {
+                double trackTime = Math.min(Math.max(clockTime - trackModel.getOffset(), 0), trackModel.getDuration());
+                double difference = Math.abs(trackTime - getCurrentTime());
+                if (difference >= ClockTimer.SYNC_THRESHOLD) {
+                    logger.info("Sync stream " + getIdentifier() + " track time: " + trackTime + " milliseconds. stream time " + getCurrentTime() + " milliseconds");
+                    setCurrentTime((long) trackTime);
+                }
             }
+        } catch (Exception e) {
+            logger.error("Error during periodic sync " + e.getMessage());
         }
     }
 
@@ -670,8 +680,8 @@ public abstract class StreamViewerDialog extends DatavyuDialog implements Stream
                 && clockTime >= trackModel.getOffset()
                 && clockTime < mixerController.getRegionController().getModel().getRegion().getRegionEnd()
                 && clockTime >= mixerController.getRegionController().getModel().getRegion().getRegionStart()) {
-                logger.info("Clock Start Starts track: " + getIdentifier() + " at time: " + clockTime);
-                start();
+            logger.info("Clock Start Starts track: " + getIdentifier() + " at time: " + clockTime);
+            start();
         }
     }
 

@@ -8,7 +8,6 @@ import org.datavyu.plugins.StreamViewerDialog;
 
 import java.awt.*;
 import java.io.File;
-import org.datavyu.util.ClockTimer;
 
 public class FFmpegStreamViewer extends StreamViewerDialog {
 
@@ -22,8 +21,6 @@ public class FFmpegStreamViewer extends StreamViewerDialog {
    */
   private FFmpegPlayer player;
 
-  private ClockTimer clockTimer;
-
   /**
    * Currently is seeking
    */
@@ -35,8 +32,8 @@ public class FFmpegStreamViewer extends StreamViewerDialog {
     logger.info("Opening file: " + sourceFile.getAbsolutePath());
     player = new FFmpegPlayer(this, sourceFile);
     setSourceFile(sourceFile);
-    clockTimer = Datavyu.getVideoController().getClockTimer();
-    clockTimer.registerListener(this);
+    Datavyu.getVideoController()
+            .getClockTimer().registerListener(this);
   }
 
   @Override
@@ -134,7 +131,7 @@ public class FFmpegStreamViewer extends StreamViewerDialog {
   @Override
   protected void cleanUp() {
     logger.info("Destroying the Player");
-    clockTimer.unRegisterListener(this);
+    Datavyu.getVideoController().getClockTimer().unRegisterListener(this);
     player.cleanUp();
   }
 
