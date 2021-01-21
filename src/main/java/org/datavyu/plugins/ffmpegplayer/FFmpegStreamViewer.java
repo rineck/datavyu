@@ -59,6 +59,13 @@ public class FFmpegStreamViewer extends StreamViewerDialog {
       if (!isSeeking) {
         isSeeking = true;
         logger.info("Set time to: " + time + " milliseconds.");
+
+        if (time >= getDuration()) {
+          // Temporary workaround to seek to end of video in FFmpeg
+          // FIXME: Add this logic to the FFmpeg plugin
+          time = getDuration() - 100;
+        }
+
         player.setCurrentTime(time / 1000.0);
         isSeeking = false;
       }
