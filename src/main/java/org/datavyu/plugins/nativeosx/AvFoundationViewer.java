@@ -50,6 +50,12 @@ public class AvFoundationViewer extends StreamViewerDialog  {
     if (time <= 0 && !Double.isNaN(player.getStartTime())) {
       time = (long) (player.getStartTime() * 1000);
     }
+
+    if (time >= getDuration()) {
+      // Temporary workaround to seek to end of video in NativeOSX
+      time = getDuration() - 100;
+    }
+
     player.setCurrentTime(time / 1000.0);
   }
 
