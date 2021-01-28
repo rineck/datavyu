@@ -64,8 +64,8 @@ public class FFmpegPlayer implements SdlKeyEventListener {
 	 * Clean up the player before closing.
 	 */
 	public void cleanUp() {
-		this.mediaPlayer.removeSdlKeyEventListener(this);
 		this.mediaPlayer.dispose();
+		this.mediaPlayer.removeSdlKeyEventListener(this);
 	}
 
 	/**

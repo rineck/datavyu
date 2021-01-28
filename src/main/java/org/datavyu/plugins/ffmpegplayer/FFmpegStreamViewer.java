@@ -138,8 +138,8 @@ public class FFmpegStreamViewer extends StreamViewerDialog {
   @Override
   protected void cleanUp() {
     logger.info("Destroying the Player");
-    Datavyu.getVideoController().getClockTimer().unRegisterListener(this);
     player.cleanUp();
+    Datavyu.getVideoController().getClockTimer().unRegisterListener(this);
   }
 
   @Override
