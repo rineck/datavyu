@@ -152,7 +152,7 @@ public final class PluginManager {
                     logger.info("Looking for plugins in: " + res.getAbsolutePath());
 
                     // Dirty hack for Quaqua.
-                    if (res.equals(new File("/System/Library/Java"))) {
+                    if (res.equals(new File("/System/Library/Java"))){
                         continue;
                     }
                     workStack.push(res);
@@ -161,37 +161,41 @@ public final class PluginManager {
 
                     while (!workStack.empty()) {
                         // We must handle spaces in the directory name
-                        File f = workStack.pop();
-                        String s = f.getCanonicalPath();
-                        s = s.replaceAll("%20", " ");
-                        File dir = new File(s);
-                        String pathName = pathNames.pop();
-                        // For each of the children of the directory - look for
-                        // Plugins or more directories to recurse inside.
-                        String[] files = dir.list();
-                        for (int i = 0; i < files.length; i++) {
-                            File file = new File(dir.getAbsolutePath() + "/" + files[i]);
-                            logger.info("Inspecting file/directory: " + file.getAbsolutePath());
-                            // If the file is a directory, add to work list.
-                            if (file.isDirectory()) {
-                                workStack.push(file);
-                                pathNames.push(pathName + file.getName() + ".");
-                                // If we are dealing with a class file - attempt to add it to our list of plugins
-                            } else if (files[i].endsWith(".class")) {
-                                addPlugin(pathName.concat(files[i]));
-                                // If it's the datavyu jar get the contents
-                            } else if (files[i].startsWith("datavyu") && files[i].endsWith(".jar")) {
-                                JarFile jar = new JarFile(file);
-                                // For each file in the jar file check to see if it could be a plugin.
-                                Enumeration<JarEntry> entries = jar.entries();
-                                while (entries.hasMoreElements()) {
-                                    String name = entries.nextElement().getName();
-                                    // Found a class file - attempt to add it as a plugin.
-                                    if (name.endsWith(".class")) {
-                                        addPlugin(name);
+                        try {
+                            File f = workStack.pop();
+                            String s = f.getCanonicalPath();
+                            s = s.replaceAll("%20", " ");
+                            File dir = new File(s);
+                            String pathName = pathNames.pop();
+                            // For each of the children of the directory - look for
+                            // Plugins or more directories to recurse inside.
+                            String[] files = dir.list();
+                            for (int i = 0; i < files.length; i++) {
+                                File file = new File(dir.getAbsolutePath() + "/" + files[i]);
+                                logger.info("Inspecting file/directory: " + file.getAbsolutePath());
+                                // If the file is a directory, add to work list.
+                                if (file.isDirectory()) {
+                                    workStack.push(file);
+                                    pathNames.push(pathName + file.getName() + ".");
+                                    // If we are dealing with a class file - attempt to add it to our list of plugins
+                                } else if (files[i].endsWith(".class")) {
+                                    addPlugin(pathName.concat(files[i]));
+                                    // If it's the datavyu jar get the contents
+                                } else if (files[i].startsWith("datavyu") && files[i].endsWith(".jar")) {
+                                    JarFile jar = new JarFile(file);
+                                    // For each file in the jar file check to see if it could be a plugin.
+                                    Enumeration<JarEntry> entries = jar.entries();
+                                    while (entries.hasMoreElements()) {
+                                        String name = entries.nextElement().getName();
+                                        // Found a class file - attempt to add it as a plugin.
+                                        if (name.endsWith(".class")) {
+                                            addPlugin(name);
+                                        }
                                     }
                                 }
                             }
+                        } catch (Exception e) {
+                            continue;
                         }
                     }
                 }
