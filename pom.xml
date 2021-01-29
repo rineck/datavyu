@@ -318,11 +318,11 @@
                     <artifactId>quaqua-osx64</artifactId>
                     <version>7.0.1</version>
                 </dependency>
-                <!--FFmpeg plugin 0.22-SNAPSHOT -->
+                <!--FFmpeg plugin 0.24 -->
                 <dependency>
                     <groupId>org.datavyu</groupId>
                     <artifactId>ffmpeg-plugin</artifactId>
-                    <version>0.23</version>
+                    <version>0.24</version>
                     <classifier>mac</classifier>
                 </dependency>
             </dependencies>
@@ -338,11 +338,11 @@
             </activation>
 
             <dependencies>
-                <!--FFmpeg plugin 0.22-SNAPSHOT -->
+                <!--FFmpeg plugin 0.24 -->
                 <dependency>
                     <groupId>org.datavyu</groupId>
                     <artifactId>ffmpeg-plugin</artifactId>
-                    <version>0.23</version>
+                    <version>0.24</version>
                     <classifier>win</classifier>
                 </dependency>
             </dependencies>
