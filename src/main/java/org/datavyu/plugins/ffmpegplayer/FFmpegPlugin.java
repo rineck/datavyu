@@ -62,7 +62,7 @@ public class FFmpegPlugin implements Plugin {
 
     @Override
     public String getPluginName() {
-        return "FFmpeg Plugin";
+        return "FFmpeg Plugin (Experimental)";
     }
 
     @Override
