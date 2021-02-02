@@ -1,3 +1,6 @@
+# Datavyu 1.5.2-RC1 Development Release Notes
+## 02/02/2021
+
 # Datavyu 1.5.1-RC3 Development Release Notes
 ## 11/20/2019
 ### Notable Changes
