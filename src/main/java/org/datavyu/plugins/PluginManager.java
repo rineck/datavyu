@@ -365,6 +365,13 @@ public final class PluginManager {
             p.sort(new Comparator<Plugin>() {
                 @Override
                 public int compare(final Plugin o1, final Plugin o2) {
+                    if ("Native OSX Video".equals(o1.getPluginName())) {
+                        return -1;
+                    }
+
+                    if ("Native OSX Video".equals(o2.getPluginName())) {
+                        return 1;
+                    }
 
                     if ("FFmpeg Plugin".equals(o1.getPluginName())) {
                         return -1;
@@ -447,9 +454,9 @@ public final class PluginManager {
         // Hard-code plugins for Windows, OSX, and Linux
         if (classifier.equals("datavyu.video")) {
 
-            // Mac default is FFmpegPlugin
+            // Mac default is Native OSX
             if (Datavyu.getPlatform() == Datavyu.Platform.MAC) {
-                return new FFmpegPlugin();
+                return new AvFoundationPlugin();
             }
 
             // Windows default is FFmpegPlugin
@@ -480,9 +487,7 @@ public final class PluginManager {
      */
     public Plugin getAssociatedPlugin(final String dataViewer) {
         //Native OSX backward compatibility
-        if (dataViewer.equals("org.datavyu.plugins.nativeosx.NativeOSXViewer")) {
-            // Datavyu 1.3.7
-            logger.info("Native OSX " + AvFoundationViewer.class.getName());
+        if (dataViewer.contains("org.datavyu.plugins.nativeosx")) {
             return viewerClassToPlugin.get(AvFoundationViewer.class.getName());
         }
         return viewerClassToPlugin.get(dataViewer);
