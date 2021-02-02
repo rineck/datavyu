@@ -375,6 +375,7 @@
                         <!-- Documentation: https://maven.apache.org/plugins/maven-compiler-plugin -->
                         <!-- Updated 02/26/2019 -->
                         <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.8.0</version>
                         <configuration combine.self="append">
                             <debug>false</debug>
                             <optimize>true</optimize>
@@ -388,6 +389,7 @@
 
     <!-- Build properties. -->
     <build>
+        <finalName>Datavyu/${project.artifactId}-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -457,19 +459,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Copies project resources to the output directory -->
-            <!-- Artifact: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-resources-plugin -->
-            <!-- Documentation: -->
-            <!-- Updated here: 01/05/2021 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-
             <!-- Clover is a tool that generates test coverage reports -->
             <!-- Renaming: https://confluence.atlassian.com/clover/what-happened-to-maven-clover2-plugin-792634162.html -->
             <!-- Artifact: http://search.maven.org/#artifactdetails%7Corg.openclover%7Cclover-maven-plugin%7C4.2.0%7Cmaven-plugin -->
@@ -486,61 +475,49 @@
                 </configuration>
             </plugin>
 
-            <!-- BugzID:304 - Generate an OSX style app bundle & disk image.-->
-            <!-- The plugin from osxappbundle-maven-plugin from org.codehaus.mojo is no longer maintained as of 2010 -->
-            <!-- In particular it does not work for java > 1.6. -->
-            <!-- For this reason I switched to appbundle-maven-plugin by sh.tak.appbundler version 1.2.0 -->
-            <!-- Artifact: https://mvnrepository.com/artifact/sh.tak.appbundler/appbundle-maven-plugin -->
-            <!-- Documentation: https://github.com/federkasten/appbundle-maven-plugin -->
-            <!-- Updated here: 09/21/2017 -->
             <plugin>
-                <groupId>sh.tak.appbundler</groupId>
-                <artifactId>appbundle-maven-plugin</artifactId>
-                <version>1.2.0</version>
-                <configuration>
-                    <bundleName>Datavyu</bundleName>
-                    <mainClass>org.datavyu.Launcher</mainClass>
-                    <jvmVersion>1.8+</jvmVersion>
-                    <additionalResources>
-                        <fileSet>
-                            <directory>src/main/</directory>
-                            <includes>
-                                <include>favorites/*.rb</include>
-                                <include>favorites/*.opf</include>
-                                <include>favorites/*.cha</include>
-                            </includes>
-                        </fileSet>
-                        <fileSet>
-                            <directory>${basedir}/packaged_docs/</directory>
-                            <includes>
-                                <include>*.txt</include>
-                                <include>*.html</include>
-                                <include>*.webloc</include>
-                                <include>*.pdf</include>
-                            </includes>
-                            <directory>${basedir}/src/main/resources/icons</directory>
-                            <includes>
-                                <include>splash.png</include>
-                            </includes>
-                        </fileSet>
-                    </additionalResources>
-                    <!-- This plugin only seems to support the default location src/main/resources for the icon file -->
-                    <iconFile>datavyu.icns</iconFile>
-                    <!-- This plugin only seems to support the default location src/main/resources for the dictionary file -->
-                    <dictionaryFile>Info.plist</dictionaryFile>
-                    <generateDiskImageFile>true</generateDiskImageFile>
-                    <diskImageFile>
-                        ${project.build.directory}/site/snapshots/${project.build.finalName}-OSX-${buildNumber}.dmg
-                    </diskImageFile>
-                </configuration>
-
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.1.2</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/Datavyu/lib</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
                 <configuration>
-                    <outputDirectory>target/site/snapshots</outputDirectory>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>org.datavyu.Datavyu</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Maven compiler -->
@@ -551,6 +528,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
+                    <encoding>UTF-8</encoding>
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
@@ -568,12 +546,12 @@
                         <manifest>
                             <mainClass>org.datavyu.Datavyu</mainClass>
                             <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
                         </manifest>
                         <manifestEntries>
-                            <!--<Class-Path>./</Class-Path>-->
+                            <Class-Path>.</Class-Path>
                         </manifestEntries>
                     </archive>
-                    <classifier>${os.detected.name}</classifier>
                 </configuration>
             </plugin>
 
@@ -724,15 +702,6 @@
                 </configuration>
             </plugin>
         </plugins>
-
-        <!-- extension to add the os name to the jar file -->
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>1.6.0</version>
-            </extension>
-        </extensions>
     </build>
 
     <!--
@@ -949,12 +918,13 @@
             <artifactId>google-analytics-java</artifactId>
             <version>2.0.0</version>
         </dependency>
-      <dependency>
-        <groupId>org.easytesting</groupId>
-        <artifactId>fest-swing</artifactId>
-        <version>1.2a4</version>
-        <scope>test</scope>
-      </dependency>
+
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-swing</artifactId>
+            <version>1.2a4</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
