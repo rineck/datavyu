@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Logger;
 import org.datavyu.Datavyu;
 import org.datavyu.models.db.Cell;
 import org.datavyu.models.db.CellListener;
-import org.datavyu.models.db.DataStore;
 import org.datavyu.models.db.CellValue;
 import org.datavyu.util.ClockTimer;
 import org.datavyu.util.ConfigProperties;
@@ -28,7 +27,6 @@ import org.datavyu.views.discrete.datavalues.TimeStampDataValueEditor.TimeStampS
 import org.datavyu.views.discrete.datavalues.TimeStampTextField;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ResourceMap;
-import org.jruby.RubyObject;
 
 import javax.swing.*;
 import javax.swing.Box.Filler;
@@ -156,12 +154,13 @@ public class SpreadsheetCell extends JPanel
     private boolean onsetProcessed = false;
     private boolean beingProcessed = false;
 
-    private SpreadsheetColumn parentColumn = null;
+    private final SpreadsheetColumn parentColumn;
 
-    public SpreadsheetCell(final DataStore cellDB,
+    public SpreadsheetCell(final SpreadsheetColumn parentColumn,
                            final Cell cell,
                            final CellSelectionListener listener) {
 
+        this.parentColumn = parentColumn;
         model = cell;
         setName(this.getClass().getSimpleName());
 
@@ -488,7 +487,9 @@ public class SpreadsheetCell extends JPanel
         if (Datavyu.getVideoController().getCellHighlightAndFocus()) {
             if (model.isPastTimeWindow(Datavyu.getVideoController().getCurrentTime())) {
                 cellPanel.setBackground(pastTimeHighlightColor);
-            } else if (cellPanel.getBackground() == pastTimeHighlightColor) {
+            }  else if(model.isInTimeWindow(Datavyu.getVideoController().getCurrentTime())) {
+                cellPanel.setBackground(timeHighlightColor);
+            } else {
                 cellPanel.setBackground(ConfigProperties.getInstance().getSpreadSheetBackgroundColor());
             }
         } else if (Datavyu.getVideoController().getCellHighlighting()) {
@@ -543,6 +544,8 @@ public class SpreadsheetCell extends JPanel
             // Update the find windows to the newly selected cell's values
             Datavyu.getVideoController().setOnsetField(model.getOnset());
             Datavyu.getVideoController().setOffsetField(model.getOffset());
+        } else if(getDataView().getEdTracker().indexOfCurrentEditor() > -1) {
+            parentColumn.setIndexOfPreviousFocusedCell(getDataView().getEdTracker().indexOfCurrentEditor());
         }
     }
 
@@ -578,6 +581,7 @@ public class SpreadsheetCell extends JPanel
         // User has clicked in magic spot, without modifier. Clear
         // currently selected cells and select this cell.
         if (!isEditorSrc && !groupSel && !contSel) {
+          logger.debug("User has clicked in magic spot, without modifier");
             ord.requestFocus();
             cellSelL.clearCellSelection();
             model.setHighlighted(!model.isSelected());
@@ -589,6 +593,7 @@ public class SpreadsheetCell extends JPanel
             // User has clicked on editor or magic spot with modifier. Add
             // this cell to the current selection.
         } else if (groupSel && !contSel) {
+          logger.debug("User has clicked on editor or magic spot with modifier.");
             ord.requestFocus();
             model.setHighlighted(!model.isSelected());
 
@@ -599,6 +604,7 @@ public class SpreadsheetCell extends JPanel
             // User has clicked on editor or magic spot with shift modifier.
             // Add this cell and everything in between the current selection.
         } else if (contSel) {
+          logger.debug("User has clicked on editor or magic spot with shift modifier");
             ord.requestFocus();
             cellSelL.addCellToContinousSelection(this);
 
@@ -607,6 +613,7 @@ public class SpreadsheetCell extends JPanel
         } else {
             // Only change selection if not selected.
             if (!model.isHighlighted()) {
+                logger.debug("Just highlighted");
                 // BugzID:320 - Deselect cells before selected cell contents.
                 cellSelL.clearCellSelection();
                 model.setHighlighted(true);
@@ -641,14 +648,6 @@ public class SpreadsheetCell extends JPanel
         Datavyu.getView().getSpreadsheetPanel().validate();
         Datavyu.getView().getSpreadsheetPanel().reorientView(this);
 
-        if(parentColumn == null) {
-            for (SpreadsheetColumn col : Datavyu.getView().getSpreadsheetPanel().getColumns()) {
-                if (col.getVariable() == model.getVariable()) {
-                    parentColumn = col;
-                    break;
-                }
-            }
-        }
         parentColumn.setSelected(true);
     }
 
@@ -657,14 +656,7 @@ public class SpreadsheetCell extends JPanel
         if (brandNew) model.setSelected(false);
         brandNew = false;
 
-        if(parentColumn == null) {
-            for (SpreadsheetColumn col : Datavyu.getView().getSpreadsheetPanel().getColumns()) {
-                if (col.getVariable() == model.getVariable()) {
-                    parentColumn = col;
-                    break;
-                }
-            }
-        }
+        parentColumn.setIndexOfPreviousFocusedCell(getDataView().getEdTracker().indexOfCurrentEditor());
 
         List<Cell> selectedCells = Datavyu.getProjectController().getDataStore().getSelectedCells();
         List<Cell> newSelectedCell =  new ArrayList<>();

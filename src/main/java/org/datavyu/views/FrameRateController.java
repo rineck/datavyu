@@ -14,20 +14,6 @@ public class FrameRateController {
 
     private Map<Long, Float> trackToFrameRate = new HashMap<>();
 
-    private boolean hasUserFrameRate = false;
-
-    private float userFrameRate = 0F;
-
-    public synchronized void addUserFrameRate(float frameRate) {
-        hasUserFrameRate = true;
-        userFrameRate = frameRate;
-    }
-
-    public synchronized void removeUserFrameRate() {
-        hasUserFrameRate = false;
-        userFrameRate = 0F;
-    }
-
     public synchronized void addFrameRate(long id, float frameRate) {
         trackToFrameRate.put(id, frameRate);
     }
@@ -45,7 +31,7 @@ public class FrameRateController {
     }
 
     public synchronized float getFrameRate() {
-        return hasUserFrameRate ? userFrameRate : getHighestFrameRate();
+        return getHighestFrameRate();
     }
 
     public synchronized boolean isZeroRate() {

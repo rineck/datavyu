@@ -19,6 +19,8 @@ import java.net.URLConnection;
  * Static methods access the local and server datavyu version.
  */
 public class DatavyuVersion {
+    /** The logger for this class */
+    private static Logger logger = LogManager.getLogger(DatavyuVersion.class);
 
     /** Version file on the datavyu web server */
     private static final String VERSION_FILE = "http://www.datavyu.org/version.txt";
@@ -31,9 +33,6 @@ public class DatavyuVersion {
 
     /** The local version is loaded and cached at start-up */
     private static final DatavyuVersion localVersion = DatavyuVersion.initLocalVersion();
-
-    /** The logger for this class */
-    private static Logger logger = LogManager.getLogger(DatavyuVersion.class);
 
     /** The version string */
     private String version;

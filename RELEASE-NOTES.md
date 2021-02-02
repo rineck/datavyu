@@ -1,3 +1,33 @@
+# Datavyu 1.5.2-RC1 Development Release Notes
+## 02/02/2021
+
+# Datavyu 1.5.1-RC3 Development Release Notes
+## 11/20/2019
+### Notable Changes
+* (Playback) Replaced steps per second by a new Shortcut to jump forward by time ( SHIFT - )
+* (Playback) Replaced "Steps per Second" by "Frame Rate".
+* (Playback) Disabled "Frame Rate" field and Added FPS label for each track.
+* (Playback) Faster FFmpeg player frames rendering.
+* (Playback) Improved FFmpeg player seeks accuracy.
+* (Ruby API) Improved ability to add and remove videos.
+
+### Bug Fixes
+* (Playback) Fixed resizing video via the controller.
+* (Playback) Fixed Native OSX player speed transitions.
+* (Playback) Fixed Native OSX jogging when track offset is positive.
+* (Playback) Fixed crashes when destroying FFmpeg player.
+* (Playback) Fixed FFmpeg player seeks to end of the video.
+* (General) Fixed Datavyu crashes when no Internet connection.
+* (General) Fixed Datavyu Mac menubar highlight on mouse hover.
+* (General) Fixed OPFs backward compatibility with previous Native OSX plugins.
+* (General) Removed ghost window opening up with mac FFmpeg player.
+* (General) Show mouse cursor on FFmpeg plugin video window.
+* (General) Select correct cell's code when highlight and focus is enabled.
+
+### Known Issues
+* Shortcuts not working on Mac FFMPEG Window.
+---
+
 # Datavyu 1.5.0 Release Notes
 ## 07/26/2019
 ### Notable Changes

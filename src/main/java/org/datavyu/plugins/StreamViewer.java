@@ -150,13 +150,6 @@ public interface StreamViewer {
     void setCurrentTime(long time);
 
     /**
-     * Seek to a frame index.
-     *
-     * @param frame index.
-     */
-    void setCurrentFrame(int frame);
-
-    /**
      * @return Custom track painter implementation. Must not return null.
      * Plugins that do not have a custom track painter implementation should
      * return {@link DefaultTrackPainter}.

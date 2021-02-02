@@ -2737,6 +2737,7 @@ def show_columns(*names)
 end
 
 # Provide access to Datavyu's video controllers.
+# @since 1.5.0
 class RVideoController
   # @return [Hash] mapping from plugin names to UUID.
   def self.plugin_uuids
@@ -2764,18 +2765,14 @@ class RVideoController
   # Set the start point of a video
   # @param stream_id stream identifier
   # @param onset [Long] start time
-  # @param timeout [Integer] seconds to wait for video repositioning to finish
-  def self.set_video_onset(stream_id, onset, timeout = 5)
-    success = false
-    t = Time.now
-    while (Time.now - t).to_f < timeout
-      success = tracks_controller.set_track_offset(stream_id, onset)
-      break if success
+  def self.set_video_onset(stream_id:, onset: 0)
+    raise "Invalid start time." unless onset >= 0 && onset.round == onset
 
-      sleep(0.5)
-    end
-    video_controller.repaint
-    success
+    stream = self.videos.find { |v| v.get_identifier == stream_id }
+    raise "Cannot find stream with id: #{stream_id}" if stream.nil?
+
+    stream.set_offset(onset)
+    self.tracks_controller.set_track_offset(stream_id, onset)
   end
 
   # Add a video to the current spreadsheet/controller.
@@ -2783,28 +2780,36 @@ class RVideoController
   # @param plugin [String] id of the plugin to use; either UUID or short name: ffmpeg, nativeosx, mpv
   # @param onset [Integer] start point of video in milliseconds
   # @param timeout [Integer] seconds to wait for the video to load up
-  # @return [True, False] true if filepath and plugin are valid, false otherwise
-  # @since 1.4.2
-  def self.new_video(filepath, plugin, onset=0, timeout=5)
-    if plugin_uuids.key?(plugin)
-      plugin_id = plugin_uuids[plugin]
-    elsif plugin_uuids.value?(plugin)
-      plugin_id = plugin
-    else
-      raise "Warning: invalid plugin \"#{plugin}\""
-    end
+  def self.new_video(filepath:, plugin: "ffmpeg", onset: 0, timeout: 5)
+    plugin_id = if plugin_uuids.key?(plugin) then plugin_uuids[plugin]
+                elsif plugin_uuids.value?(plugin) then plugin
+                else raise "Invalid plugin: '#{plugin}'"
+                end
 
     uuid = java.util.UUID.from_string(plugin_id)
-    id = video_controller.open_video(filepath, uuid)
-    return false if id.nil?
-    p id
-    success = set_video_onset(id, onset, timeout)
-    puts "WARNING: added video but timed out trying to set start point." unless success
+    id = self.video_controller.open_video(filepath, uuid)
+    raise "Cannot open file." if id.nil?
+
+    t = Time.now
+    while Time.now - t <= timeout
+      loaded = self.videos.map(&:get_identifier).include?(id)
+      loaded ? break : sleep(0.5)
+    end
+    raise "Unable to load video in time." if loaded.nil?
+
+    self.set_video_onset(stream_id: id, onset: onset)
   end
 
   # @return video streams
   def self.videos
     video_controller.get_stream_viewers
+  end
+
+  # Remove all videos from the Controller
+  def self.remove_all
+    ids = videos.map(&:get_identifier)
+    ids.each { |i| self.video_controller.shutdown(i, false) }
+    video_controller.repaint
   end
 
   # Get the uuid of the plugin a video is using
@@ -2826,32 +2831,33 @@ class RVideoController
 
 end
 
-def new_video(filepath, plugin, onset = 0)
-  RVideoController.new_video(filepath, plugin, onset)
+# Add a video to the controller.
+# Provided as a convenience for the method in the controller class
+def new_video(filepath:, plugin: "ffmpeg", onset: 0, timeout: 5)
+  RVideoController.new_video(filepath: filepath, plugin: plugin, onset: onset)
 end
 
 # Save video controller information to spreadsheet column.
 # Each stream is saved to a different cell.
 # Onset and offset of cells designate track positions.
-# @param column_name [String] name of the returned column
+# @param column [String, RColumn] name for a new column or an existing column
 # @param file_code [String] code name of source file
 # @param plugin_code [String] code name of player plugin
 # @param plugin_uuid? [Boolean] save plugin as uuid if true, name otherwise
-def videos_to_column(column = 'tracks__',
-                     file_code = 'file',
-                     plugin_code = 'plugin', plugin_uuid = false)
-  if column.class == String
-    tracks_col = new_column(column, file_code, plugin_code)
-  end
+def videos_to_column(column: 'tracks__',
+                     file_code: 'file',
+                     plugin_code: 'plugin', plugin_uuid: false)
+  tracks_col = if column.class == String then new_column(column, file_code, plugin_code)
+               elsif column.class == RColumn then column
+               else raise "Invalid column parameter type."
+               end
 
   RVideoController.videos.each do |stream|
     ncell = tracks_col.new_cell
     ncell.change_code(file_code,
                       stream.get_source_file.get_path)
-    plugin = if plugin_uuid
-               RVideoController.plugin_uuid_of(stream)
-             else
-               RVideoController.plugin_of(stream)
+    plugin = if plugin_uuid then RVideoController.plugin_uuid_of(stream)
+             else RVideoController.plugin_of(stream)
              end
     ncell.change_code(plugin_code, plugin)
     ncell.onset = stream.get_offset
@@ -2860,14 +2866,24 @@ def videos_to_column(column = 'tracks__',
   tracks_col
 end
 
-def column_to_videos(column = 'tracks__', file_code = 'file',
-                     plugin_code = 'plugin')
-  tracks_col = column.class == String ? get_column(column) : column
-  raise "Invalid column: #{column}" if tracks_col.nil?
+# Load track information from a column and add the videos to the Controller.
+# @param column [String, RColumn] column or column name containing track info
+# @param file_code [String] code name of source file
+# @param plugin_code [String] code name of player plugin
+# @param clean [Boolean] clears existing tracks if true, append otherwise
+def column_to_videos(column: 'tracks__', file_code: 'file',
+                     plugin_code: 'plugin', clean: false)
+  RVideoController.remove_all if clean
+
+  tracks_col = if column.class == String then get_column(column)
+               elsif column.class == RColumn then column
+               else raise "Invalid column parameter: #{column}"
+               end
+  raise "Invalid column: #{tracks_col}" if tracks_col.nil?
 
   tracks_col.cells.each do |cell|
-    new_video(cell.get_code(file_code),
-              cell.get_code(plugin_code),
-              cell.onset)
+    RVideoController.new_video(filepath: cell.get_code(file_code),
+              plugin: cell.get_code(plugin_code),
+              onset: cell.onset)
   end
 end

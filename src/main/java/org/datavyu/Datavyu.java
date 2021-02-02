@@ -171,8 +171,6 @@ public final class Datavyu extends SingleFrameApplication implements KeyEventDis
     public static void main(final String[] args) {
         // If we are running on a MAC set system properties
         if (Datavyu.getPlatform() == Platform.MAC) {
-            System.setProperty("apple.laf.useScreenMenuBar", "true");
-            System.setProperty("com.apple.mrj.application.apple.menu.about.name", "Datavyu");
             System.setProperty("Quaqua.jniIsPreloaded", "true");
         }
         launch(Datavyu.class, args);
@@ -551,8 +549,10 @@ public final class Datavyu extends SingleFrameApplication implements KeyEventDis
 
                 if (modifiers == InputEvent.CTRL_MASK) {
                     videoController.clearRegionOfInterestAction();
+                } else if (modifiers == InputEvent.SHIFT_MASK){
+                    videoController.pressJumpForward();
                 } else {
-                    videoController.pressGoBack();
+                    videoController.pressJumpBack();
                 }
 
                 break;
@@ -596,14 +596,6 @@ public final class Datavyu extends SingleFrameApplication implements KeyEventDis
     public void showVideoController() {
         Datavyu.getApplication().show(videoController);
         videoController.setShouldBeVisible(true);
-    }
-
-    /**
-     * Action for showing the video converter.
-     */
-    public void showVideoConverter() {
-        VideoConverterV videoConverter = new VideoConverterV();
-        Datavyu.getApplication().show(videoConverter);
     }
 
     /**

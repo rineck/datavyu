@@ -19,21 +19,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.datavyu.Datavyu;
 import org.datavyu.plugins.ffmpegplayer.FFmpegPlugin;
+import org.datavyu.plugins.nativeosx.AvFoundationPlugin;
+import org.datavyu.plugins.nativeosx.AvFoundationViewer;
 import org.datavyu.util.MacOS;
-import org.jdesktop.application.LocalStorage;
 
 import javax.swing.filechooser.FileFilter;
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 
 /**
@@ -100,161 +93,14 @@ public final class PluginManager {
     private void initialize() {
         logger.info("Initializing the PluginManager");
         try {
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            URL resource = loader.getResource("");
-            // Quaqua workaround
-            if ((resource != null) && resource.toString().equals("file:/System/Library/Java/")) {
-                resource = null;
+            if (Datavyu.getPlatform() == Datavyu.Platform.MAC) {
+                addPlugin(FFmpegPlugin.class.getName());
+                addPlugin(AvFoundationPlugin.class.getName());
+            } else if (Datavyu.getPlatform() == Datavyu.Platform.WINDOWS) {
+                addPlugin(FFmpegPlugin.class.getName());
             }
-            if (resource != null && resource.getPath().endsWith("lib/")) {
-                resource = null;
-            }
-            // The classloader references a jar - open the jar file up and iterate through all the entries and add
-            // the entries that are concrete Plugins.
-            if (resource == null) {
-                logger.info("Loading plugins from jar");
-                resource = loader.getResource("org/datavyu");
-                if (resource == null) {
-                    throw new ClassNotFoundException("Can't get class loader.");
-                }
-                String file = resource.getFile();
-                file = file.substring(0, file.indexOf("!"));
-
-                URI uri = new URI(file);
-                File f = new File(uri);
-                JarFile jar = new JarFile(f);
-
-                Enumeration<JarEntry> entries = jar.entries();
-
-                while (entries.hasMoreElements()) {
-                    String name = entries.nextElement().getName();
-                    if (name.endsWith(".class")) {
-                        addPlugin(name);
-                    }
-                }
-                // The classloader references a bunch of .class files on disk, recursively inspect contents of each
-                // of the resources. If it is a directory add it to our workStack, otherwise check to see if it is a
-                // concrete plugin.
-            } else {
-                logger.info("Loading plugins from resource bundle.");
-                // If we are running from a test we need to look in more than one place for classes - add all these
-                // places to the work stack.
-                Enumeration<URL> resources = loader.getResources("");
-
-                Stack<File> workStack = new Stack<>();
-                Stack<String> pathNames = new Stack<>();
-
-                while (resources.hasMoreElements()) {
-                    workStack.clear();
-                    File res = new File(resources.nextElement().getFile());
-
-                    logger.info("Looking for plugins in: " + res.getAbsolutePath());
-
-                    // Dirty hack for Quaqua.
-                    if (res.equals(new File("/System/Library/Java"))) {
-                        continue;
-                    }
-                    workStack.push(res);
-                    pathNames.clear();
-                    pathNames.push("");
-
-                    while (!workStack.empty()) {
-                        // We must handle spaces in the directory name
-                        File f = workStack.pop();
-                        String s = f.getCanonicalPath();
-                        s = s.replaceAll("%20", " ");
-                        File dir = new File(s);
-                        String pathName = pathNames.pop();
-                        // For each of the children of the directory - look for
-                        // Plugins or more directories to recurse inside.
-                        String[] files = dir.list();
-                        for (int i = 0; i < files.length; i++) {
-                            File file = new File(dir.getAbsolutePath() + "/" + files[i]);
-                            logger.info("Inspecting file/directory: " + file.getAbsolutePath());
-                            // If the file is a directory, add to work list.
-                            if (file.isDirectory()) {
-                                workStack.push(file);
-                                pathNames.push(pathName + file.getName() + ".");
-                                // If we are dealing with a class file - attempt to add it to our list of plugins
-                            } else if (files[i].endsWith(".class")) {
-                                addPlugin(pathName.concat(files[i]));
-                                // If it's the datavyu jar get the contents
-                            } else if (files[i].startsWith("datavyu") && files[i].endsWith(".jar")) {
-                                JarFile jar = new JarFile(file);
-                                // For each file in the jar file check to see if it could be a plugin.
-                                Enumeration<JarEntry> entries = jar.entries();
-                                while (entries.hasMoreElements()) {
-                                    String name = entries.nextElement().getName();
-                                    // Found a class file - attempt to add it as a plugin.
-                                    if (name.endsWith(".class")) {
-                                        addPlugin(name);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            // We scanned the Datavyu classpath - but we should also look in the "plugins" directory for jar files that
-            // correctly conform to the Datavyu plugin interface
-            LocalStorage localStorage = Datavyu.getApplication().getContext().getLocalStorage();
-            File pluginDir = new File(localStorage.getDirectory().toString() + "/plugins");
-
-            // Unable to find plugin directory or any entries within the plugin directory. Don't bother attempting to
-            // add more plugins to Datavyu
-            if (pluginDir.list() == null) {
-                logger.info("Unable to find the 'plugins' directory.");
-                return;
-            }
-
-            // For each of the files in the plugin directory - check to see if they conform to the plugin interface.
-            for (String file : pluginDir.list()) {
-                File f = new File(pluginDir.getAbsolutePath() + "/" + file);
-                if (file == null) {
-                    throw new ClassNotFoundException("Null file");
-                    // If the file is a jar file open it and look for plugins
-                } else if (file.endsWith(".jar")) {
-                    injectPlugin(f);
-                    JarFile jar = new JarFile(f);
-                    // For each file in the jar file check to see if it could be a plugin.
-                    Enumeration<JarEntry> entries = jar.entries();
-                    while (entries.hasMoreElements()) {
-                        String name = entries.nextElement().getName();
-                        // Found a class file - attempt to add it as a plugin.
-                        if (name.endsWith(".class")) {
-                            addPlugin(name);
-                        }
-                    }
-                }
-            }
-        } catch (ClassNotFoundException e) {
-            logger.error("Unable to build Plugin", e);
-        } catch (IOException ie) {
-            logger.error("Unable to load jar file", ie);
-        } catch (URISyntaxException se) {
-            logger.error("Unable to build path to jar file", se);
-        }
-    }
-
-    /**
-     * Injects A plugin into the classpath.
-     *
-     * @param file The jar file to inject into the classpath.
-     *
-     * @throws IOException If unable to inject the plugin into the class path.
-     */
-    private void injectPlugin(final File file) throws IOException {
-        URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-        Class<?> sysclass = URLClassLoader.class;
-        logger.info("Injecting plugin from file: " + file.getAbsolutePath());
-
-        try {
-            Class<?>[] parameters = new Class[]{URL.class};
-            Method method = sysclass.getDeclaredMethod("addURL", parameters);
-            method.setAccessible(true);
-            method.invoke(sysLoader, new Object[]{file.toURL()});
-        } catch (Throwable t) {
-            logger.error("Unable to inject class into class path.", t);
+        } catch (Exception e) {
+            logger.error("Unable to load plugin", e);
         }
     }
 
@@ -360,20 +206,19 @@ public final class PluginManager {
             p.sort(new Comparator<Plugin>() {
                 @Override
                 public int compare(final Plugin o1, final Plugin o2) {
+                    if ("Native OSX Video".equals(o1.getPluginName())) {
+                        return -1;
+                    }
+
+                    if ("Native OSX Video".equals(o2.getPluginName())) {
+                        return 1;
+                    }
 
                     if ("FFmpeg Plugin".equals(o1.getPluginName())) {
                         return -1;
                     }
 
                     if ("FFmpeg Plugin".equals(o2.getPluginName())) {
-                        return 1;
-                    }
-
-                    if ("Native OSX Video".equals(o1.getPluginName())) {
-                        return -1;
-                    }
-
-                    if ("Native OSX Video".equals(o2.getPluginName())) {
                         return 1;
                     }
 
@@ -442,9 +287,9 @@ public final class PluginManager {
         // Hard-code plugins for Windows, OSX, and Linux
         if (classifier.equals("datavyu.video")) {
 
-            // Mac default is FFmpegPlugin
+            // Mac default is Native OSX
             if (Datavyu.getPlatform() == Datavyu.Platform.MAC) {
-                return new FFmpegPlugin();
+                return new AvFoundationPlugin();
             }
 
             // Windows default is FFmpegPlugin
@@ -474,6 +319,10 @@ public final class PluginManager {
      * {@code null} otherwise.
      */
     public Plugin getAssociatedPlugin(final String dataViewer) {
+        //Native OSX backward compatibility
+        if (dataViewer.contains("org.datavyu.plugins.nativeosx")) {
+            return viewerClassToPlugin.get(AvFoundationViewer.class.getName());
+        }
         return viewerClassToPlugin.get(dataViewer);
     }
 

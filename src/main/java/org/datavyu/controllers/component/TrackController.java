@@ -43,6 +43,7 @@ import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 
@@ -75,6 +76,9 @@ public final class TrackController implements ViewerStateListener, PropertyChang
 
     /** Label holding the icon for the plugin */
     private final JLabel iconLabel;
+
+    /** Label holding the frame rate for the plugin */
+    private final JLabel frameRateLabel;
 
     /** Component that paints the track */
     private final TrackPainter trackPainter;
@@ -169,6 +173,10 @@ public final class TrackController implements ViewerStateListener, PropertyChang
         iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
         iconLabel.setHorizontalTextPosition(SwingConstants.CENTER);
 
+        frameRateLabel = new JLabel("", SwingConstants.LEFT);
+        frameRateLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        frameRateLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+        frameRateLabel.setFont(new Font(frameRateLabel.getName(), Font.PLAIN, 10));
 
         header = new JPanel(new MigLayout("ins 0, wrap 6"));
         header.setBorder(BorderFactory.createCompoundBorder(
@@ -182,7 +190,8 @@ public final class TrackController implements ViewerStateListener, PropertyChang
         // first action icon cell push out as well. 136 was calculated from
         // 140 pixels minus 2 minus 2 (from the empty border defined above).
         header.add(trackLabel, "span 6, w 136!, center, growx");
-        header.add(iconLabel, "span 6, w 136!, h 32!, center, growx");
+        header.add(iconLabel, "span 2, w 45!, h 32!, center, growx");
+        header.add(frameRateLabel, "span 4, w 91!, h 32!, left, growx");
 
         // Set up the button used for locking/unlocking track movement
         {
@@ -330,11 +339,19 @@ public final class TrackController implements ViewerStateListener, PropertyChang
      * @param offset Offset of the data feed in milliseconds
      */
     void setTrackInformation(final Identifier id, final ImageIcon icon, final File mediaPath,
-                             final long duration, final long offset) {
+                             final long duration, final long offset, final float frameRate) {
 
         if (icon != null) {
             iconLabel.setIcon(icon);
         }
+
+        if (frameRate > 0) {
+            DecimalFormat df = new DecimalFormat();
+            df.setMaximumFractionDigits(2);
+            df.setMinimumFractionDigits(2);
+            frameRateLabel.setText("FPS: " + df.format(frameRate));
+        }
+
         final String trackName = mediaPath.getName();
         final String trackPath = mediaPath.getAbsolutePath();
 

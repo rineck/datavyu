@@ -14,7 +14,6 @@
  */
 package org.datavyu.controllers;
 
-import com.github.rcaller.rstuff.RCallerOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.datavyu.Datavyu;
@@ -26,6 +25,8 @@ import org.datavyu.views.DatavyuFileChooser;
 import org.jruby.embed.AttributeName;
 import com.github.rcaller.rstuff.RCaller;
 import com.github.rcaller.rstuff.RCode;
+import org.jruby.embed.EvalFailedException;
+import org.jruby.exceptions.RaiseException;
 
 import javax.script.*;
 import javax.swing.*;
@@ -60,8 +61,6 @@ public final class RunScriptController extends SwingWorker<Object, String> {
     private OutputStreamWriter consoleWriterAfter;
 
     private OutputStream sIn;
-
-    private StringBuilder outString = new StringBuilder("");
 
     /**
      * Constructs and invokes the run script controller.
@@ -155,7 +154,6 @@ public final class RunScriptController extends SwingWorker<Object, String> {
             return;
         }
         rubyScriptIsRunning = true;
-        outString = new StringBuilder("");
         // init script engine
         System.setProperty("org.jruby.embed.localvariable.behavior", "transient");
         ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
@@ -186,12 +184,13 @@ public final class RunScriptController extends SwingWorker<Object, String> {
                 rubyEngine.setContext(rubyContext);
                 rubyEngine.getContext().setWriter(consoleWriter);
                 rubyEngine.getContext().setErrorWriter(consoleWriter);
-                rubyEngine.getContext().setAttribute(AttributeName.TERMINATION.toString(), true,
-                        ScriptContext.ENGINE_SCOPE);
-                rubyEngine.getContext().setAttribute(AttributeName.CLEAR_VARAIBLES.toString(), true,
-                        ScriptContext.ENGINE_SCOPE);
                 try{
                     rubyEngine.eval("load 'Datavyu_API.rb'\n");
+                    rubyEngine.getContext().setAttribute(ScriptEngine.FILENAME, scriptFile.getAbsolutePath(), ScriptContext.ENGINE_SCOPE);
+                    rubyEngine.getContext().setAttribute(AttributeName.TERMINATION.toString(), true,
+                            ScriptContext.ENGINE_SCOPE);
+                    rubyEngine.getContext().setAttribute(AttributeName.CLEAR_VARAIBLES.toString(), true,
+                            ScriptContext.ENGINE_SCOPE);
                     rubyEngine.eval(lineReader);
                     consoleWriter.close();
 
@@ -203,10 +202,10 @@ public final class RunScriptController extends SwingWorker<Object, String> {
                 catch (ScriptException e) {
                     //unfortunately the above seems to always be final line not line of error. still, no noticeable
                     // performance difference, so im leaving the LineNumberReader wrap
-                    String msg = makeFriendlyRubyErrorMsg(outString.toString(), e);
                     consoleWriter.flush();
                     consoleWriter.close();
                     consoleWriterAfter.write("\n\n***** SCRIPT ERROR *****\n");
+                    String msg = makeFriendlyRubyErrorMsg(e);
                     consoleWriterAfter.write(msg);
                     consoleWriterAfter.write("\n*************************\n");
                     consoleWriterAfter.flush();
@@ -247,38 +246,47 @@ public final class RunScriptController extends SwingWorker<Object, String> {
         return new StringReader(sb.toString());
     }
 
-    private String makeFriendlyRubyErrorMsg(String out, ScriptException e) {
-        try {
-            if (out.lastIndexOf("<script>") == -1) return e.getMessage();
-            String s = "";
-            //s should begin with ruby-relevant error portion, NOT full java stack
-            //which would be of little interest to the user and only obscures what matters
-            int endIndex = out.indexOf("org.jruby.embed.EvalFailedException:");
-            if (endIndex == -1) s = out.substring(out.lastIndexOf('*') + 1);
-            else s = out.substring(out.lastIndexOf('*') + 1, endIndex);
-
-            //for each script error print the relevant line number. these are listed
-            //in OPPOSITE of stack order so that the top of the stack (most likely to be
-            //where the actual error lies), is the last thing shown and most apparent to user
-            String linesOut = "";
-            StringTokenizer outputTokenizer = new StringTokenizer(out, "\n");
-            while (outputTokenizer.hasMoreTokens()) {
-                String curLine = outputTokenizer.nextToken();
-                int scriptTagIndex = curLine.lastIndexOf("<script>:");
-                if (scriptTagIndex != -1) {
-                    int errorLine = Integer.parseInt(curLine.substring(scriptTagIndex).replaceAll("[^0-9]", ""));
-                    LineNumberReader scriptLNR = new LineNumberReader(new FileReader(scriptFile));
-                    while (scriptLNR.getLineNumber() < errorLine - 1) scriptLNR.readLine(); //advance to errorLine
-                    linesOut = "\nSee line " + errorLine + " of " + scriptFile + ":" + "\n" + scriptLNR.readLine() + linesOut;
-                }
-            }
-            s += linesOut;
-            assert(!s.trim().isEmpty()); //this should ensure we never get a blank message - e.getMessage at the very least
-            return s;
-        } catch (Exception e2) //if <script>: is not found in previous output, or other error occurs, default to exception's message
-        {
-            return e.getMessage();
+    private String makeFriendlyRubyErrorMsg(Throwable scriptException) {
+        String s = "";
+        Throwable innerCause = scriptException.getCause();
+        if (innerCause != null && innerCause != scriptException) {
+            s = makeFriendlyRubyErrorMsg(innerCause);
         }
+
+        // These are just wrappers used by the interpreter
+        if (scriptException instanceof ScriptException || scriptException instanceof EvalFailedException) {
+            return s;
+        }
+
+        // Don't report on pure Ruby exceptions; they have already been written to the console
+        boolean isRubyException = (scriptException instanceof RaiseException);
+        if (!isRubyException) s += scriptException.toString() + ":\n";
+
+        String linesOut = "";
+        boolean hitRubyStack = false;
+        for (StackTraceElement frame : scriptException.getStackTrace()) {
+            String className = frame.getClassName();
+            if (className.equals("RUBY") && scriptFile.getAbsolutePath().equals(frame.getFileName())) {
+                // Don't report on pure Ruby exceptions; they have already been written to the console
+                if (!isRubyException) {
+                    if (!hitRubyStack) s += "\t...\n";
+                    s += "\t" + frame.getMethodName() + " at " + frame.getFileName() + ":" + frame.getLineNumber() + "\n";
+                }
+                hitRubyStack = true;
+
+                try {
+                    LineNumberReader scriptLNR = new LineNumberReader(new FileReader(scriptFile));
+                    while (scriptLNR.getLineNumber() < frame.getLineNumber() - 1) scriptLNR.readLine(); //advance to errorLine
+                    linesOut += "\nSee line " + frame.getLineNumber() + " of " + scriptFile + ":" + "\n" + scriptLNR.readLine();
+                } catch (Exception e) {
+                    logger.error("Getting line from script", e);
+                }
+            } else if (!hitRubyStack && !className.startsWith("org.jruby") && !className.startsWith("java.lang.reflect")) {
+                s += "\t" + frame.toString() + "\n";
+            }
+        }
+
+        return s + linesOut;
     }
 
     private void runRScript(File scriptFile) {
@@ -409,8 +417,7 @@ public final class RunScriptController extends SwingWorker<Object, String> {
     /**
      * Separate thread for polling the incoming data from the scripting engine.
      * The data from the scripting engine gets placed directly into the
-     * consoleOutput and also kept in outString for revisiting during
-     * error reporting
+     * consoleOutput.
      */
     class ReaderThread extends Thread {
 
@@ -433,7 +440,6 @@ public final class RunScriptController extends SwingWorker<Object, String> {
                     if (len > 0) {
                         // Publish output from script in the console.
                         String s = new String(buf, 0, len);
-                        outString.append(s);
                         publish(s);
                     }
 
@@ -446,7 +452,6 @@ public final class RunScriptController extends SwingWorker<Object, String> {
                     if (len > 0) {
                         // Publish output from script in the console.
                         String s = new String(buf, 0, len);
-                        outString.append(s);
                         publish(s);
                     }
                     // Allow other threads to do stuff.

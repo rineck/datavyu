@@ -3,11 +3,11 @@
 [Setup]
 AppId={{org.datavyu}}
 AppName=datavyu
-AppVersion=1.5.0
-AppVerName=Datavyu 1.5.0
+AppVersion=1.5.2-RC1
+AppVerName=Datavyu 1.5.2-RC1
 AppPublisher=Datavyu Foundation
 AppComments=datavyu
-AppCopyright=Copyright (C) 2015
+AppCopyright=Copyright (C) 2021
 ;AppPublisherURL=http://www.datavyu.org/
 ;AppSupportURL=http://www.datavyu.org/contact.html
 ;AppUpdatesURL=http://www.datavyu.org/download.html

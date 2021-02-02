@@ -225,7 +225,7 @@ public final class MixerController implements PropertyChangeListener,
         enableHighlightAndFocus = new JButton("Enable Highlight and Focus");
         enableHighlightAndFocus.addActionListener(new ActionListener() {
             public void actionPerformed(final ActionEvent e) {
-                enableHighlightAndFocusHandler(e);
+                Datavyu.getView().toggleHighlightAndFocusMode();
             }
         });
         enableHighlightAndFocus.setName("enableHighlightAndFocusButton");
@@ -493,10 +493,11 @@ public final class MixerController implements PropertyChangeListener,
      * @param duration     The total duration of the track in milliseconds.
      * @param offset       The amount of playback offset in milliseconds.
      * @param trackPainter The track painter to use.
+     * @param frameRate    Stream's Frame Rate.
      */
     public void addNewTrack(final Identifier id, final ImageIcon icon,
                             final File mediaPath, final long duration,
-                            final long offset, final TrackPainter trackPainter) {
+                            final long offset, final TrackPainter trackPainter, final float frameRate) {
 
         // Check if the scale needs to be updated
         final long trackEnd = duration + offset;
@@ -507,7 +508,7 @@ public final class MixerController implements PropertyChangeListener,
             regionModel.resetPlaybackRegion();
         }
 
-        tracksEditorController.addNewTrack(id, icon, mediaPath, duration, offset, this, trackPainter);
+        tracksEditorController.addNewTrack(id, icon, mediaPath, duration, offset, this, trackPainter, frameRate);
         tracksScrollPane.validate();
 
         updateGlobalLockToggle();
@@ -786,6 +787,7 @@ public final class MixerController implements PropertyChangeListener,
 
         enableHighlight.setEnabled(!Datavyu.getVideoController().getCellHighlightAndFocus());
         Datavyu.getProjectController().getSpreadSheetPanel().redrawCells();
+        Datavyu.getApplication().updateTitle();
     }
 
     /**

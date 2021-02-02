@@ -166,16 +166,16 @@ public final class VideoController extends DatavyuDialog
     private JTextField onsetTextField;
 
     /** */
-    private JButton goBackButton;
+    private JButton jumpByButton;
 
     /** */
-    private JTextField goBackTextField;
+    private JTextField jumpByTextField;
 
     /** */
     private JTextField stepSizeTextField;
 
     /** */
-    private JLabel stepSizeLabel = new JLabel("Steps per second");
+    private JLabel stepSizeLabel = new JLabel("Frame Rate");
 
     /** */
     private JPanel stepSizePanel;
@@ -233,6 +233,8 @@ public final class VideoController extends DatavyuDialog
     private boolean highlightAndFocus = false;
 
     private FrameRateController frameRateController = new FrameRateController();
+
+    private int jumpDirection = -1;
 
     /**
      * Create a new VideoController.
@@ -342,6 +344,7 @@ public final class VideoController extends DatavyuDialog
         new Thread(() -> {
             if (plugin != null) {
                 try {
+                    logger.debug("Open Video " + videoFile + " With plugin " + plugin);
                     StreamViewer streamViewer = plugin.getNewStreamViewer(
                             id,
                             videoFile,
@@ -574,10 +577,10 @@ public final class VideoController extends DatavyuDialog
      *
      * @param id The identifier of the viewer to shutdown.
      */
-    public void shutdown(final Identifier id) {
+    public void shutdown(final Identifier id, boolean confirm) {
         StreamViewer streamViewer = getStreamViewer(id);
 
-        if ((streamViewer == null) || !shouldRemove()) {
+        if ((streamViewer == null) || (confirm && !shouldRemove())) {
             return;
         }
 
@@ -605,6 +608,9 @@ public final class VideoController extends DatavyuDialog
         Datavyu.getProjectController().projectChanged();
     }
 
+    public void shutdown(final Identifier id){
+        shutdown(id, true);
+    }
     /**
      * Binds a window event listener to a stream viewer.
      *
@@ -703,7 +709,7 @@ public final class VideoController extends DatavyuDialog
      */
     private void initComponents() {
         gridButtonPanel = new JPanel();
-        goBackTextField = new JTextField();
+        jumpByTextField = new JTextField();
         stepSizeTextField = new JTextField();
         onsetTextField = new JTextField();
         JButton addDataButton = new JButton();
@@ -820,7 +826,7 @@ public final class VideoController extends DatavyuDialog
             //Placeholder - perhaps eventually the sync video button
             gridButtonPanel.add(makePlaceholderButton(false), WIDE_TEXT_FIELD_SIZE);
         } else {
-            addGoBackPair();
+            addJumpByPair();
         }
         // Set cell onset button with 7
         setCellOnsetButton = buildButton("setCellOnset");
@@ -837,7 +843,7 @@ public final class VideoController extends DatavyuDialog
 
         // MAC and WINDOWS DIFFER
         if (osModifier.equals("osx")) {
-            addGoBackPair();
+            addJumpByPair();
         } else {
             // Find button (big plus)
             findButton = buildButton("find", "win");
@@ -921,15 +927,15 @@ public final class VideoController extends DatavyuDialog
         pack();
     }
 
-    private void addGoBackPair() {
+    private void addJumpByPair() {
         //Go back button - minus key
-        goBackButton = buildButton("goBack", null);
-        gridButtonPanel.add(goBackButton, NUM_PAD_KEY_SIZE);
+        jumpByButton = buildButton("jumpBy", null);
+        gridButtonPanel.add(jumpByButton, NUM_PAD_KEY_SIZE);
         //Go back text field
-        goBackTextField.setHorizontalAlignment(SwingConstants.CENTER);
-        goBackTextField.setText("00:00:05:000");
-        goBackTextField.setName("goBackTextField");
-        gridButtonPanel.add(makeLabelAndTextFieldPanel(new JLabel("Jump back by"), goBackTextField),
+        jumpByTextField.setHorizontalAlignment(SwingConstants.CENTER);
+        jumpByTextField.setText("00:00:05:000");
+        jumpByTextField.setName("jumpByTextField");
+        gridButtonPanel.add(makeLabelAndTextFieldPanel(new JLabel("Jump by"), jumpByTextField),
                 WIDE_TEXT_FIELD_SIZE);
     }
 
@@ -939,41 +945,7 @@ public final class VideoController extends DatavyuDialog
         stepSizeTextField.setName("stepSizeTextField");
         stepSizeTextField.setToolTipText("Double click to change");
         stepSizeTextField.setPreferredSize(new Dimension(WIDE_TEXT_FIELD_WIDTH - 10, 18));
-        stepSizeTextField.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() >= 2 && !streamViewers.isEmpty()) {
-                    stepSizeTextField.setEnabled(true);
-                    pressStop();
-                }
-            }
-            public void mouseEntered(MouseEvent e) {}
-            public void mousePressed(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-        });
-
-        stepSizeTextField.addKeyListener(new KeyListener() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-
-                    // Parse the new frame rate
-                    float newFramesPerSecond = 1F/Float.parseFloat(stepSizeTextField.getText());
-
-                    // Update the frame rate controller with the user defined frame rate
-                    frameRateController.addUserFrameRate(newFramesPerSecond);
-
-                    // Update the streams with the new rate
-                    clockTimer.setRate(newFramesPerSecond);
-
-                    stepSizeTextField.setEnabled(false);
-                    updateStepSizePanelColor();
-                }
-            }
-            public void keyTyped(KeyEvent e) {}
-            public void keyReleased(KeyEvent e) {}
-        });
+        stepSizeTextField.setEnabled(false);
         stepSizePanel = makeLabelAndTextFieldPanel(stepSizeLabel, stepSizeTextField);
         gridButtonPanel.add(stepSizePanel, WIDE_TEXT_FIELD_SIZE);
         updateStepSizeTextField();
@@ -982,11 +954,7 @@ public final class VideoController extends DatavyuDialog
     private void updateStepSizeTextField() {
 
         // If we don't have any stream viewers, disable the label and remove the user-defined rate
-        if (streamViewers.isEmpty()) {
-            stepSizeTextField.setEnabled(false);
-            frameRateController.removeUserFrameRate();
-        } else if (frameRateController.isZeroRate()) {
-            stepSizeTextField.setEnabled(false);
+         if (frameRateController.isZeroRate()) {
             stepSizeTextField.setText("");
         } else {
             stepSizeTextField.setText(Float.toString(frameRateController.getFrameRate()));
@@ -1116,7 +1084,8 @@ public final class VideoController extends DatavyuDialog
                 streamViewer.getSourceFile(),
                 streamViewer.getDuration(),
                 streamViewer.getOffset(),
-                streamViewer.getTrackPainter());
+                streamViewer.getTrackPainter(),
+                streamViewer.getFramesPerSecond());
 
         // min and max time
         long maxTime = mixerController.getTracksEditorController().getMaxTime();
@@ -1336,8 +1305,17 @@ public final class VideoController extends DatavyuDialog
     /**
      * Simulates go back button clicked.
      */
-    public void pressGoBack() {
-        goBackButton.doClick();
+    public void pressJumpBack() {
+        jumpDirection = -1;
+        jumpByButton.doClick();
+    }
+
+    /**
+     * Simulates go back button clicked.
+     */
+    public void pressJumpForward() {
+        jumpDirection = 1;
+        jumpByButton.doClick();
     }
 
     /**
@@ -1511,9 +1489,9 @@ public final class VideoController extends DatavyuDialog
      */
     @Action
     @SuppressWarnings("unused")  // Called through actionMap
-    public void goBackAction() {
+    public void jumpByAction() {
         try {
-            long backTime = -CLOCK_FORMAT.parse(goBackTextField.getText()).getTime();
+            long backTime = jumpDirection * CLOCK_FORMAT.parse(jumpByTextField.getText()).getTime();
             long newTime = (long) clockTimer.getClockTime() + backTime;
             logger.info("Jump back by " +  backTime + " From: " + clockTimer.getStreamTime() + " To: " + newTime);
             clockTimer.setForceTime(newTime);
@@ -1549,25 +1527,20 @@ public final class VideoController extends DatavyuDialog
             for (StreamViewer streamViewer : streamViewers) {
                 // TODO: Tie offset & duration to stream viewer only and pull it in the track model
                 TrackModel trackModel = tracksEditorController.getTrackModel(streamViewer.getIdentifier());
-                if (streamViewer.isStepEnabled()) {
-                    double streamStep = 1.0 / streamViewer.getFramesPerSecond();
-                    double frameNB =  (double)((newTime - trackModel.getOffset()) / 1000.0) / streamStep;
-
-                    logger.info("Stream " + streamViewer.getIdentifier()
-                        + " - Jog back to frame " + (int) frameNB);
-
-                    streamViewer.setCurrentFrame((int) frameNB);
+                if (streamViewer.isStepEnabled()
+                    && streamViewer.getFramesPerSecond() == frameRate) {
+                    streamViewer.stepBackward();
                 } else if (trackModel != null){
                     // Get the stream time
-                    long trackTime = streamViewer.getCurrentTime();
+                    long trackTime = newTime - trackModel.getOffset();
 
                     // Notice that the new time is in jogs to frame markers by being modulo step size
-                    long newStreamTime = Math.max( Math.min(Math.max(newTime, 0),
+                    long newStreamTime = Math.max( Math.min(Math.max(trackTime, 0),
                                             trackModel.getDuration())
                         , Datavyu.getVideoController().getMixerController().getRegionController().getModel().getRegion().getRegionStart());
 
                     logger.info("Stream " + streamViewer.getIdentifier()
-                        + " - Jog back from " + newTime + " milliseconds to " + newStreamTime + " milliseconds");
+                        + " - Jog back from " + trackTime + " milliseconds to " + newStreamTime + " milliseconds");
 
                     streamViewer.setCurrentTime(newStreamTime);
                 }
@@ -1627,25 +1600,20 @@ public final class VideoController extends DatavyuDialog
             long newTime = clockTime - (clockTime % stepSize) + stepSize;
             for (StreamViewer streamViewer : streamViewers) {
                 TrackModel trackModel = tracksEditorController.getTrackModel(streamViewer.getIdentifier());
-                if (streamViewer.isStepEnabled()) {
-                    double streamStep = 1.0 / streamViewer.getFramesPerSecond();
-                    double frameNB =  (double)( (newTime - trackModel.getOffset()) / 1000.0) / streamStep;
-
-                    logger.info("Stream " + streamViewer.getIdentifier()
-                        + " - Jog forward to frame " + (int) frameNB);
-
-                    streamViewer.setCurrentFrame((int) frameNB);
+                if (streamViewer.isStepEnabled()
+                        && streamViewer.getFramesPerSecond() == frameRate) {
+                    streamViewer.stepForward();
                 } else if (trackModel != null){
                     // Get the stream time
-                    long trackTime = streamViewer.getCurrentTime();
+                    long trackTime = newTime - trackModel.getOffset();
 
                     // Notice that the new time is in jogs to frame markers by being modulo step size
-                    long newStreamTime = Math.min(Math.min(Math.max(newTime, 0),
+                    long newStreamTime = Math.min(Math.min(Math.max(trackTime, 0),
                                             trackModel.getDuration())
                        , Datavyu.getVideoController().getMixerController().getRegionController().getModel().getRegion().getRegionEnd());
 
                     logger.info("Stream " + streamViewer.getIdentifier()
-                        + " - Jog forward from " + newTime + " milliseconds to " + newStreamTime + " milliseconds.");
+                        + " - Jog forward from " + trackTime + " milliseconds to " + newStreamTime + " milliseconds.");
 
                     streamViewer.setCurrentTime(newStreamTime);
                 }

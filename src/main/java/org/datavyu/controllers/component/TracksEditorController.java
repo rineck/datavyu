@@ -116,15 +116,16 @@ public final class TracksEditorController implements TrackMouseEventListener {
      * @param listener     Register the listener interested in {@link CarriageEvent}.
      *                     Null if uninterested
      * @param trackPainter The track painter to use
+     * @param frameRate    Stream's Frame Rate
      */
     public void addNewTrack(final Identifier trackId, final ImageIcon icon,
                             final File mediaPath, final long duration,
                             final long offset, final CarriageEventListener listener,
-                            final TrackPainter trackPainter) {
+                            final TrackPainter trackPainter, final float frameRate) {
 
         // TrackController
         final TrackController trackController = new TrackController(mixerModel, trackPainter);
-        trackController.setTrackInformation(trackId, icon, mediaPath, duration, offset);
+        trackController.setTrackInformation(trackId, icon, mediaPath, duration, offset, frameRate);
         trackController.addMarker(-1);
 
         if (duration < 0) {
