@@ -302,7 +302,6 @@
 
     <!-- Use an optimized build for releases. -->
     <profiles>
-
         <!-- Platform specific dependencies. -->
         <profile>
             <id>mac</id>
