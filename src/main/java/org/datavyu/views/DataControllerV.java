@@ -1228,13 +1228,13 @@ public final class DataControllerV extends DatavyuDialog
         gridButtonPanel.add(makePlaceholderButton(), NUMPAD_KEY_SIZE);
 
         //Point cell: Mac equal sign, windows forward slash
-        pointCellButton = buildButton("pointCell", osModifier);
+        pointCellButton = buildButton("pointCell");
         gridButtonPanel.add(pointCellButton, NUMPAD_KEY_SIZE);
 
         //Show/hide: Mac forward flash, windows asterisk
         showTracksSmallButton = new JButton();
         showTracksSmallButton.setIcon(resourceMap.getIcon(
-                "showTracksSmallButton.hide.icon." + osModifier));
+                "showTracksSmallButton.hide.icon"));
         showTracksSmallButton.setName("showTracksSmallButton");
         showTracksSmallButton.getAccessibleContext().setAccessibleName(
                 "Show Tracks");
