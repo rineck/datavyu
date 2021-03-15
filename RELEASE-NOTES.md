@@ -1,5 +1,19 @@
+# Datavyu 1.5.2 Release Notes
+## 03/15/2021
+### Notable Changes
+* Changed Mac OS Hide/Show track to * numpad key
+* Changed Mac OS Point Cell to / numpad key
+
 # Datavyu 1.5.2-RC1 Development Release Notes
 ## 02/02/2021
+### Notable Changes
+* Default to Native OSX plugin on Mac OS
+* Removed Datavyu Video Converter
+
+### Bug Fixes
+* Fixed Shortcuts errors in the Shortcuts list window
+* Fixed seeking to end of video when dragging the track
+* Fixed crashes on loading Datavyu plugins
 
 # Datavyu 1.5.1-RC3 Development Release Notes
 ## 11/20/2019
