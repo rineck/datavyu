@@ -1553,15 +1553,15 @@ public final class DataControllerV extends DatavyuDialog
             LOGGER.info("Show tracks (" + button.getName() + ")");
 
             // Panel is being displayed, hide it
-            button.setIcon(resourceMap.getIcon(button.getName() + ".show.icon." + osModifier));
-            button.setPressedIcon(resourceMap.getIcon(button.getName() + "Selected.show.icon." + osModifier));
+            button.setIcon(resourceMap.getIcon(button.getName() + ".show.icon"));
+            button.setPressedIcon(resourceMap.getIcon(button.getName() + "Selected.show.icon"));
 
         } else {
             LOGGER.info("Hide tracks (" + button.getName() + ")");
 
             // Panel is hidden, show it
-            button.setIcon(resourceMap.getIcon(button.getName() + ".hide.icon." + osModifier));
-            button.setPressedIcon(resourceMap.getIcon(button.getName() + "Selected.hide.icon." + osModifier));
+            button.setIcon(resourceMap.getIcon(button.getName() + ".hide.icon"));
+            button.setPressedIcon(resourceMap.getIcon(button.getName() + "Selected.hide.icon"));
         }
 
         tracksPanelEnabled = !tracksPanelEnabled;
