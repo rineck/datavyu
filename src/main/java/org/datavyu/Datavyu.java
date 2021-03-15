@@ -453,33 +453,16 @@ public final class Datavyu extends SingleFrameApplication implements KeyEventDis
         switch (evt.getKeyCode()) {
 
             case KeyEvent.VK_DIVIDE:
-                //Mac - Show/hide
-                if (getPlatform().equals(Platform.MAC)) {
-                    videoController.pressShowTracksSmall();
-                }
-                //Win - point cell
-                else {
-                    videoController.pressPointCell();
-                }
-
-                break;
-
-            case KeyEvent.VK_EQUALS:
-                //Mac - point cell
-                if (getPlatform().equals(Platform.MAC)) {
-                    videoController.pressPointCell();
-                }
-                //Win - nothing
+                //point cell
+                videoController.pressPointCell();
                 break;
 
             case KeyEvent.VK_ASTERISK:
 
                 break;
             case KeyEvent.VK_MULTIPLY:
-                //Win - Show/hide
-                if (!getPlatform().equals(Platform.MAC)) {
-                    videoController.pressShowTracksSmall();
-                }
+                //Show/hide
+                videoController.pressShowTracksSmall();
                 break;
 
             case KeyEvent.VK_NUMPAD7:
