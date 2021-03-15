@@ -801,13 +801,13 @@ public final class VideoController extends DatavyuDialog
         gridButtonPanel.add(makePlaceholderButton(), NUM_PAD_KEY_SIZE);
 
         // Point cell: Mac equal sign, windows forward slash
-        pointCellButton = buildButton("pointCell", osModifier);
+        pointCellButton = buildButton("pointCell");
         gridButtonPanel.add(pointCellButton, NUM_PAD_KEY_SIZE);
 
         // Show/hide: Mac forward flash, windows asterisk
         showTracksSmallButton = new JButton();
         showTracksSmallButton.setIcon(resourceMap.getIcon(
-                "showTracksSmallButton.hide.icon." + osModifier));
+                "showTracksSmallButton.hide.icon"));
         showTracksSmallButton.setName("showTracksSmallButton");
         showTracksSmallButton.getAccessibleContext().setAccessibleName(
                 "Show Tracks");
@@ -1037,13 +1037,13 @@ public final class VideoController extends DatavyuDialog
         if (tracksPanelVisible) {
             logger.info("Show tracks (" + button.getName() + ")");
             // Panel is being displayed, hide it
-            button.setIcon(resourceMap.getIcon(button.getName() + ".show.icon." + osModifier));
-            button.setPressedIcon(resourceMap.getIcon(button.getName() + "Selected.show.icon." + osModifier));
+            button.setIcon(resourceMap.getIcon(button.getName() + ".show.icon"));
+            button.setPressedIcon(resourceMap.getIcon(button.getName() + "Selected.show.icon"));
         } else {
             logger.info("Hide tracks (" + button.getName() + ")");
             // Panel is hidden, show it
-            button.setIcon(resourceMap.getIcon(button.getName() + ".hide.icon." + osModifier));
-            button.setPressedIcon(resourceMap.getIcon(button.getName() + "Selected.hide.icon." + osModifier));
+            button.setIcon(resourceMap.getIcon(button.getName() + ".hide.icon"));
+            button.setPressedIcon(resourceMap.getIcon(button.getName() + "Selected.hide.icon"));
         }
 
         tracksPanelVisible = !tracksPanelVisible;
