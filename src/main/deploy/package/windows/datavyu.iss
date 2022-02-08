@@ -3,8 +3,8 @@
 [Setup]
 AppId={{org.datavyu}}
 AppName=datavyu
-AppVersion=1.5.2
-AppVerName=Datavyu 1.5.2
+AppVersion=1.5.3
+AppVerName=Datavyu 1.5.3
 AppPublisher=Datavyu Foundation
 AppComments=datavyu
 AppCopyright=Copyright (C) 2021

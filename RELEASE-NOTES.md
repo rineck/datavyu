@@ -1,3 +1,13 @@
+# Datavyu 1.5.3 Release Notes
+## 02/07/2022
+### Notable Changes
+* Removed Log4j vulnerabilities for Datavyu 1.5.2
+
+# Datavyu 1.3.8 Release Notes
+## 02/07/2022
+### Notable Changes
+* Removed Log4j vulnerabilities for Datavyu 1.3.7
+
 # Datavyu 1.5.2 Release Notes
 ## 03/15/2021
 ### Notable Changes
